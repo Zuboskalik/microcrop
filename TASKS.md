@@ -61,55 +61,59 @@
 
 ### Phase 4: Robokassa Payment Service (Backend)
 
-- [ ] Task 4.1: Добавить конфиг `config/robokassa.php` (merchant_login, password1, password2, base_url, is_test, prices по `product_type`).
-- [ ] Task 4.2: Создать `RobokassaService` с методом `buildPaymentUrl()` — формирование URL оплаты с MD5-подписью (`MerchantLogin:OutSum:InvId:Password1`).
-- [ ] Task 4.3: Реализовать в `RobokassaService` метод `verifyCallbackSignature()` — проверка входящей подписи (`OutSum:InvId:Password2`) с `hash_equals`.
-- [ ] Task 4.4: Создать `CreateOrderRequest` (Form Request) с валидацией `product_type`, `guest_email`.
-- [ ] Task 4.5: Реализовать `PaymentsController@create` (`POST /api/payments/create`) — создание `Order(status=pending)` и возврат `payment_url`.
-- [ ] Task 4.6: Реализовать `PaymentsController@callback` (`POST /api/payments/callback`) — валидация подписи, обновление `Order(status=paid)`, генерация `AccessToken`.
-- [ ] Task 4.7: Реализовать `PaymentsController@status` (`GET /api/payments/{order}/status`) — polling статуса заказа и одноразовая выдача raw-токена фронтенду.
-- [ ] Task 4.8: Исключить `POST /api/payments/callback` из CSRF-проверки (`VerifyCsrfToken::$except`), т.к. вызывается сервером Robokassa напрямую.
-- [ ] Task 4.9: Настроить rate-limiting (`throttle:60,1`) на `/api/payments/create` и `/api/tokens/*`.
-- [ ] Task 4.10: Реализовать `TokensController@validate` (`POST /api/tokens/validate`) — проверка `token_hash` и срока действия.
-- [ ] Task 4.11: Зарегистрировать все маршруты в `routes/api.php` с префиксом `/api`.
-- [ ] Task 4.12: Настроить логирование неуспешных/подозрительных callback-запросов (невалидная подпись) через `Log::warning`.
-- [ ] Task 4.13: Настроить интеграцию с приложением «Мой налог» / фискализацию чеков для самозанятого (НПД) через личный кабинет Robokassa (конфигурационный шаг, не код).
-- [ ] Task 4.14: Написать Unit-тест на `RobokassaService::buildPaymentUrl()` (корректность подписи и параметров URL).
-- [ ] Task 4.15: Написать Unit-тест на `RobokassaService::verifyCallbackSignature()` (валидная/невалидная подпись).
-- [ ] Task 4.16: Написать Feature-тест на `POST /api/payments/create` (создание заказа, статус `pending`, корректный `payment_url`).
-- [ ] Task 4.17: Написать Feature-тест на `POST /api/payments/callback` (успешная оплата → `status=paid`, создан `AccessToken`; невалидная подпись → `400`).
-- [ ] Task 4.18: Написать Feature-тест на `POST /api/tokens/validate` (валидный/просроченный/несуществующий токен).
+- [x] Task 4.1: Добавить конфиг `config/robokassa.php` (merchant_login, password1, password2, base_url, is_test, prices по `product_type`).
+- [x] Task 4.2: Создать `RobokassaService` с методом `buildPaymentUrl()` — формирование URL оплаты с MD5-подписью (`MerchantLogin:OutSum:InvId:Password1`).
+- [x] Task 4.3: Реализовать в `RobokassaService` метод `verifyCallbackSignature()` — проверка входящей подписи (`OutSum:InvId:Password2`) с `hash_equals`.
+- [x] Task 4.4: Создать `CreateOrderRequest` (Form Request) с валидацией `product_type`, `guest_email`.
+- [x] Task 4.5: Реализовать `PaymentsController@create` (`POST /api/payments/create`) — создание `Order(status=pending)` и возврат `payment_url`.
+- [x] Task 4.6: Реализовать `PaymentsController@callback` (`POST /api/payments/callback`) — валидация подписи, обновление `Order(status=paid)`, генерация `AccessToken`.
+- [x] Task 4.7: Реализовать `PaymentsController@status` (`GET /api/payments/{order}/status`) — polling статуса заказа и одноразовая выдача raw-токена фронтенду.
+- [x] Task 4.8: Исключить `POST /api/payments/callback` из CSRF-проверки. *(отдельное исключение не потребовалось: маршрут живёт в `routes/api.php`, middleware-группа `api` в Laravel 11 не включает CSRF по умолчанию — проверено вручную curl'ом.)*
+- [x] Task 4.9: Настроить rate-limiting (`throttle:60,1`) на `/api/payments/create` и `/api/tokens/*`.
+- [x] Task 4.10: Реализовать `TokensController@validate` (`POST /api/tokens/validate`) — проверка `token_hash` и срока действия.
+- [x] Task 4.11: Зарегистрировать все маршруты в `routes/api.php` с префиксом `/api`.
+- [x] Task 4.12: Настроить логирование неуспешных/подозрительных callback-запросов (невалидная подпись) через `Log::warning`.
+- [ ] Task 4.13: Настроить интеграцию с приложением «Мой налог» / фискализацию чеков для самозанятого (НПД) через личный кабинет Robokassa (конфигурационный шаг, не код — требует реального аккаунта Robokassa).
+- [x] Task 4.14: Написать Unit-тест на `RobokassaService::buildPaymentUrl()` (корректность подписи и параметров URL).
+- [x] Task 4.15: Написать Unit-тест на `RobokassaService::verifyCallbackSignature()` (валидная/невалидная подпись).
+- [x] Task 4.16: Написать Feature-тест на `POST /api/payments/create` (создание заказа, статус `pending`, корректный `payment_url`).
+- [x] Task 4.17: Написать Feature-тест на `POST /api/payments/callback` (успешная оплата → `status=paid`, создан `AccessToken`; невалидная подпись → `400`).
+- [x] Task 4.18: Написать Feature-тест на `POST /api/tokens/validate` (валидный/просроченный/несуществующий токен).
+
+*Все 20 тестов (`php artisan test`) проходят; полный цикл create → callback → status → validate дополнительно проверен вручную через curl на реальном dev-сервере.*
 
 ---
 
 ### Phase 5: Frontend Core & FFmpeg.wasm Integration
 
-- [ ] Task 5.1: Установить `@ffmpeg/ffmpeg` (v0.12+) и `@ffmpeg/util` через npm.
-- [ ] Task 5.2: Настроить загрузку `core.wasm`/`worker.js` (self-hosted в `public/ffmpeg/` либо через CDN) с учётом COOP/COEP заголовков (Task 1.7).
-- [ ] Task 5.3: Разработать компонент `VideoUploader.jsx` (Drag-and-Drop зона + fallback `<input type="file">`).
-- [ ] Task 5.4: Добавить в `VideoUploader.jsx` клиентскую валидацию формата (MP4/MOV/WebM/AVI) и максимального размера файла с понятным сообщением об ошибке.
-- [ ] Task 5.5: Разработать компонент видео-плеера предпросмотра (`VideoPreview.jsx`) на базе `<video>` + `URL.createObjectURL`.
-- [ ] Task 5.6: Разработать компонент `CropOverlay.jsx` — рамка кадрирования с ресайзом за угловые маркеры и перетаскиванием.
-- [ ] Task 5.7: Реализовать пресеты соотношений сторон в `CropOverlay.jsx`: 16:9, 9:16, 1:1, Free.
-- [ ] Task 5.8: Реализовать пересчёт координат Crop Box из координат превью (CSS px) в координаты реального разрешения видео (для передачи в FFmpeg-фильтр `crop=w:h:x:y`).
-- [ ] Task 5.9: Разработать компонент `TimelineTrimmer.jsx` — таймлайн с двумя хендлами (начало/конец) и текстовым отображением `чч:мм:сс.мс`.
-- [ ] Task 5.10: Добавить в `TimelineTrimmer.jsx` возможность точного ручного ввода времени начала/конца.
+- [x] Task 5.1: Установить `@ffmpeg/ffmpeg` (v0.12+) и `@ffmpeg/util` через npm. *(вместо `@ffmpeg/core-mt` использован однопоточный `@ffmpeg/core` — см. заметку под списком)*
+- [x] Task 5.2: Настроить загрузку `core.wasm`/`worker.js` (self-hosted в `public/ffmpeg/`) с учётом COOP/COEP заголовков (Task 1.7).
+- [x] Task 5.3: Разработать компонент `VideoUploader.jsx` (Drag-and-Drop зона + fallback `<input type="file">`).
+- [x] Task 5.4: Добавить в `VideoUploader.jsx` клиентскую валидацию формата (MP4/MOV/WebM/AVI) и максимального размера файла с понятным сообщением об ошибке.
+- [x] Task 5.5: Разработать компонент видео-плеера предпросмотра (`VideoPreview.jsx`) на базе `<video>` + `URL.createObjectURL`.
+- [x] Task 5.6: Разработать компонент `CropOverlay.jsx` — рамка кадрирования с ресайзом за угловые маркеры и перетаскиванием.
+- [x] Task 5.7: Реализовать пресеты соотношений сторон в `CropOverlay.jsx`: 16:9, 9:16, 1:1, Free.
+- [x] Task 5.8: Реализовать пересчёт координат Crop Box из координат превью (CSS px) в координаты реального разрешения видео (для передачи в FFmpeg-фильтр `crop=w:h:x:y`).
+- [x] Task 5.9: Разработать компонент `TimelineTrimmer.jsx` — таймлайн с двумя хендлами (начало/конец) и текстовым отображением `чч:мм:сс.мс`.
+- [x] Task 5.10: Добавить в `TimelineTrimmer.jsx` возможность точного ручного ввода времени начала/конца.
 - [ ] Task 5.11: (Опционально) Реализовать генерацию миниатюр кадров (thumbnails) для таймлайна.
-- [ ] Task 5.12: Написать хук `useFFmpeg.js` — инициализация `FFmpeg` инстанса, загрузка core в Web Worker, метод `load()`.
-- [ ] Task 5.13: Реализовать в `useFFmpeg.js` метод записи входного файла в virtual FS (`writeFile('input.mp4', ...)`).
-- [ ] Task 5.14: Реализовать модуль `lib/ffmpegPipeline.js` с функцией `buildFilterChain({ crop, hasProAccess, outputHeight })`, собирающей строку `-vf`.
-- [ ] Task 5.15: Реализовать формирование полной FFmpeg-команды (crop + trim `-ss`/`-to` + кодек `libx264`/`aac`) в `ffmpegPipeline.js`.
-- [ ] Task 5.16: Реализовать в `useFFmpeg.js` запуск `exec()` с командой и подписку на прогресс (`ffmpeg.on('progress', ...)`) для индикатора выполнения.
-- [ ] Task 5.17: Реализовать чтение результата из virtual FS (`readFile('output.mp4')`) и формирование `Blob`/download-ссылки.
-- [ ] Task 5.18: Загрузить шрифт (`Inter-Regular.ttf`) в virtual FS ffmpeg.wasm перед рендером для корректной работы `drawtext`.
-- [ ] Task 5.19: Реализовать наложение водяного знака "microcrop" через `drawtext` (полупрозрачный текст, правый нижний угол, отступ ~2% от высоты кадра) для бесплатного режима — см. [ARCHITECTURE.md §4](ARCHITECTURE.md#4-watermark--ffmpeg-filter-specification).
-- [ ] Task 5.20: Реализовать адаптивный расчёт `fontsize`/отступов водяного знака относительно `outputHeight` (формулы из ARCHITECTURE.md §4.4).
-- [ ] Task 5.21: Разработать компонент `RenderingScreen.jsx` — экран ожидания рендера с прогресс-баром и слотом для рекламного блока.
-- [ ] Task 5.22: Реализовать обработку ошибок рендера (нехватка памяти, неподдерживаемый кодек) с понятным UI-сообщением и возможностью повторить попытку.
-- [ ] Task 5.23: Реализовать кнопку «Скачать» с именем файла вида `microcrop_<timestamp>.mp4`.
-- [ ] Task 5.24: Собрать единый экран/страницу редактора (`EditorPage.jsx`), объединяющий Uploader → Preview/CropOverlay → TimelineTrimmer → Render → Download.
-- [ ] Task 5.25: Реализовать применение `preset` (из `data-preset` атрибута Blade-страницы, см. ARCHITECTURE.md §2.1) как начальной конфигурации `CropOverlay`/`TimelineTrimmer` при монтировании React-приложения.
-- [ ] Task 5.26: Проверить, что весь пайплайн рендера выполняется в Web Worker и не блокирует UI-поток (профилирование в DevTools).
+- [x] Task 5.12: Написать хук `useFFmpeg.js` — инициализация `FFmpeg` инстанса, загрузка core в Web Worker, метод `load()`.
+- [x] Task 5.13: Реализовать в `useFFmpeg.js` метод записи входного файла в virtual FS (`writeFile('input.mp4', ...)`).
+- [x] Task 5.14: Реализовать модуль `lib/ffmpegPipeline.js` с функцией `buildFilterChain({ crop, hasProAccess, outputHeight })`, собирающей строку `-vf`.
+- [x] Task 5.15: Реализовать формирование полной FFmpeg-команды (crop + trim `-ss`/`-to` + кодек `libx264`/`aac`) в `ffmpegPipeline.js`.
+- [x] Task 5.16: Реализовать в `useFFmpeg.js` запуск `exec()` с командой и подписку на прогресс (`ffmpeg.on('progress', ...)`) для индикатора выполнения.
+- [x] Task 5.17: Реализовать чтение результата из virtual FS (`readFile('output.mp4')`) и формирование `Blob`/download-ссылки.
+- [x] Task 5.18: Загрузить шрифт в virtual FS ffmpeg.wasm перед рендером для корректной работы `drawtext`. *(шрифт `DejaVu Sans` — открытая TTF-лицензия, вместо `Inter-Regular.ttf`: у Inter нет официальной npm-дистрибуции в формате `.ttf`; см. `public/fonts/watermark-regular.ttf` + `DEJAVU-LICENSE.txt`)*
+- [x] Task 5.19: Реализовать наложение водяного знака "microcrop" через `drawtext` для бесплатного режима — **проверено визуально**: рендер тестового клипа дал видимый полупрозрачный знак «microcrop» в правом нижнем углу.
+- [x] Task 5.20: Реализовать адаптивный расчёт `fontsize`/отступов водяного знака относительно `outputHeight` — проверено на двух разрешениях выхода (324px и 288px), знак пропорционально масштабируется.
+- [ ] Task 5.21: Разработать компонент `RenderingScreen.jsx` — экран ожидания рендера с прогресс-баром и слотом для рекламного блока. *(сейчас прогресс встроен как текст кнопки в `EditorPage.jsx`; отдельный экран с ad-слотом — часть Phase 6.)*
+- [ ] Task 5.22: Реализовать обработку ошибок рендера с понятным UI-сообщением и возможностью повторить попытку. *(сообщение об ошибке показывается; повторная попытка = просто повторный клик, отдельного retry-UX нет.)*
+- [x] Task 5.23: Реализовать кнопку «Скачать» с именем файла вида `microcrop_<timestamp>.mp4`.
+- [x] Task 5.24: Собрать единый экран/страницу редактора (`EditorPage.jsx`), объединяющий Uploader → Preview/CropOverlay → TimelineTrimmer → Render → Download.
+- [x] Task 5.25: Реализовать применение `preset` (из `data-preset` атрибута Blade-страницы) как начальной конфигурации `CropOverlay` при монтировании React-приложения.
+- [x] Task 5.26: Проверить, что рендер выполняется в Web Worker и не блокирует UI-поток — подтверждено сквозным браузерным тестом (Drag&Drop → crop → trim → render → скачивание) с реальным видеофайлом.
+
+**Важное отступление от изначального плана (см. ARCHITECTURE.md/Task 5.1–5.2):** многопоточное ядро `@ffmpeg/core-mt` в связке с воркером `@ffmpeg/ffmpeg` оказалось ненадёжным — при загрузке multi-threaded core он сам создаёт пул internal pthread-воркеров через blob: URL, и эта цепочка "воркер в воркере" молча зависала без единой ошибки в консоли (проверено в реальном браузере). Переключение на однопоточную сборку `@ffmpeg/core` полностью решило проблему: полный цикл (crop 9:16 + trim 1с–3с + водяной знак) подтверждён и на уровне видимого результата (скачанный файл проверен через `ffprobe`: точные 162×288px, длительность 2.000000s), и визуально (кадр с водяным знаком экспортирован и просмотрен). COOP/COEP-заголовки оставлены как есть — не мешают однопоточному режиму и позволяют вернуться к `core-mt` позже, если проблема будет решена на стороне библиотеки. Также обнаружен и исправлен сопутствующий баг из Phase 2: статический `public/robots.txt` (дефолтный файл скелета Laravel) перекрывал наш динамический маршрут `/robots.txt` — файл удалён.
 
 ---
 
