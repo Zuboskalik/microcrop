@@ -2,6 +2,10 @@
 /vendor/
 /public/build/
 /public/hot
+
+# Self-hosted FFmpeg.wasm core (воспроизводится из @ffmpeg/core-mt через
+# `npm run postinstall` / scripts/copy-ffmpeg-core.mjs — см. package.json)
+/public/ffmpeg/
 /storage/*.key
 /storage/pail
 /storage/app/*
