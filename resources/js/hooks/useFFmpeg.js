@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import {
     buildFfmpegArgs,
@@ -7,41 +8,8 @@ import {
     WATERMARK_FONT_FILENAME,
 } from '../lib/ffmpegPipeline.js';
 
-const CORE_BASE_URL = '/ffmpeg/core-mt';
-const FFMPEG_UMD_URL = '/ffmpeg/ffmpeg.js';
+const CORE_BASE_URL = '/ffmpeg/core';
 const WATERMARK_FONT_URL = '/fonts/watermark-regular.ttf';
-
-let ffmpegUmdLoadPromise = null;
-
-/**
- * Подгружает UMD-сборку @ffmpeg/ffmpeg (window.FFmpegWASM) отдельным
- * <script> тегом вместо ESM-импорта из npm-пакета.
- *
- * Причина: ESM-версия создаёт свой внутренний worker с {type: "module"},
- * а модульные worker'ы всегда фетчатся в режиме "cors" — в dev-режиме это
- * даёт cross-origin ошибку (Vite-сервер на другом порту), а в проде —
- * блокировку по Cross-Origin-Resource-Policy, если статику отдаёт `php
- * artisan serve` (он не пропускает существующие файлы через middleware).
- * UMD-сборка создаёт классический same-origin worker, свободный от обоих
- * ограничений (см. scripts/copy-ffmpeg-core.mjs).
- */
-function loadFFmpegUmd() {
-    if (window.FFmpegWASM) {
-        return Promise.resolve(window.FFmpegWASM);
-    }
-
-    if (!ffmpegUmdLoadPromise) {
-        ffmpegUmdLoadPromise = new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = FFMPEG_UMD_URL;
-            script.onload = () => resolve(window.FFmpegWASM);
-            script.onerror = () => reject(new Error('Не удалось загрузить ffmpeg.js'));
-            document.head.appendChild(script);
-        });
-    }
-
-    return ffmpegUmdLoadPromise;
-}
 
 /**
  * Инкапсулирует жизненный цикл FFmpeg.wasm: загрузку core в Web Worker,
@@ -58,9 +26,8 @@ export function useFFmpeg() {
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState(null);
 
-    const getFFmpeg = useCallback(async () => {
+    const getFFmpeg = useCallback(() => {
         if (!ffmpegRef.current) {
-            const { FFmpeg } = await loadFFmpegUmd();
             ffmpegRef.current = new FFmpeg();
             ffmpegRef.current.on('progress', ({ progress: p }) => {
                 // progress иногда приходит вне диапазона [0,1] на коротких клипах —
@@ -73,26 +40,19 @@ export function useFFmpeg() {
     }, []);
 
     const load = useCallback(async () => {
-        const ffmpeg = await getFFmpeg();
+        const ffmpeg = getFFmpeg();
 
         if (ffmpeg.loaded) {
             setLoaded(true);
             return ffmpeg;
         }
 
-        setLoading(true);
         setError(null);
 
         try {
             await ffmpeg.load({
-                // classWorkerURL — тоже blob: сам браузер не должен фетчить worker-скрипт
-                // по сети: под COEP:require-corp такой запрос требует явного
-                // Cross-Origin-Resource-Policy заголовка, которого нет у статики,
-                // отданной `php artisan serve` в обход Laravel-middleware.
-                classWorkerURL: await toBlobURL('/ffmpeg/814.ffmpeg.js', 'text/javascript'),
                 coreURL: await toBlobURL(`${CORE_BASE_URL}/ffmpeg-core.js`, 'text/javascript'),
                 wasmURL: await toBlobURL(`${CORE_BASE_URL}/ffmpeg-core.wasm`, 'application/wasm'),
-                workerURL: await toBlobURL(`${CORE_BASE_URL}/ffmpeg-core.worker.js`, 'text/javascript'),
             });
 
             setLoaded(true);
@@ -101,8 +61,6 @@ export function useFFmpeg() {
         } catch (err) {
             setError(err);
             throw err;
-        } finally {
-            setLoading(false);
         }
     }, [getFFmpeg]);
 
@@ -127,6 +85,7 @@ export function useFFmpeg() {
     const render = useCallback(async (file, options) => {
         setError(null);
         setProgress(0);
+        setLoading(true);
 
         try {
             const ffmpeg = await load();
@@ -153,6 +112,8 @@ export function useFFmpeg() {
         } catch (err) {
             setError(err);
             throw err;
+        } finally {
+            setLoading(false);
         }
     }, [load, ensureWatermarkFont]);
 

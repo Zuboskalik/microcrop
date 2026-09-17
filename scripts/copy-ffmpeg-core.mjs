@@ -1,41 +1,37 @@
-// Копирует self-hosted файлы FFmpeg.wasm из node_modules в public/ffmpeg,
-// откуда их раздаёт Laravel/Vite dev-сервер с уже настроенными
-// COOP/COEP-заголовками (см. ARCHITECTURE.md §1, resources/js/hooks/useFFmpeg.js).
+// Копирует self-hosted core-файлы FFmpeg.wasm (@ffmpeg/core, однопоточная
+// сборка) из node_modules в public/ffmpeg/core, откуда их раздаёт
+// Laravel/Vite dev-сервер с уже настроенными COOP/COEP-заголовками (см.
+// ARCHITECTURE.md §1, resources/js/hooks/useFFmpeg.js).
 //
-// Используется UMD-сборка @ffmpeg/ffmpeg (ffmpeg.js/814.ffmpeg.js), а не ESM-
-// импорт из npm-пакета: ESM-версия создаёт свой внутренний worker с
-// {type: "module"}, а модульные worker'ы всегда фетчатся в режиме "cors" —
-// это даёт cross-origin ошибку в dev-режиме (Vite-сервер на другом порту) и
-// блокировку по Cross-Origin-Resource-Policy в проде, если статику отдают
-// не через Laravel (см. заметку о `php artisan serve` в README.md). UMD-
-// сборка создаёт классический same-origin worker и не подвержена этим
-// ограничениям.
+// Почему однопоточное ядро, а не @ffmpeg/core-mt: многопоточная сборка
+// сама создаёт пул internal pthread-воркеров через blob: URL изнутри
+// основного FFmpeg-воркера — эта цепочка worker-в-воркере оказалась
+// ненадёжной (тихо зависает без ошибки в ряде окружений). Однопоточное
+// ядро не создаёт дополнительных воркеров и работает предсказуемо; для
+// клиентского crop/trim/watermark на коротких клипах эта разница в
+// скорости не критична. COOP/COEP-заголовки всё равно оставлены — они
+// не мешают однопоточному режиму и позволяют перейти на core-mt позже.
+//
+// ESM-сборка обязательна: worker самого @ffmpeg/ffmpeg всегда создаётся
+// как module-worker ({type: "module"}), и внутри пытается `import()` core —
+// UMD-сборка core для этого не подходит ("failed to import ffmpeg-core.js").
 //
 // Файлы не хранятся в git (см. .gitignore) — они воспроизводимы из
-// зависимостей @ffmpeg/ffmpeg и @ffmpeg/core-mt при каждой установке
-// (postinstall).
+// зависимости @ffmpeg/core при каждой установке (postinstall).
 import { copyFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const destDir = join(projectRoot, 'public', 'ffmpeg');
-const coreDestDir = join(destDir, 'core-mt');
+const srcDir = join(projectRoot, 'node_modules', '@ffmpeg', 'core', 'dist', 'esm');
+const destDir = join(projectRoot, 'public', 'ffmpeg', 'core');
 
-mkdirSync(coreDestDir, { recursive: true });
+const files = ['ffmpeg-core.js', 'ffmpeg-core.wasm'];
 
-const copies = [
-    // Многопоточный core (см. useFFmpeg.js: coreURL/wasmURL/workerURL).
-    [join(projectRoot, 'node_modules', '@ffmpeg', 'core-mt', 'dist', 'umd', 'ffmpeg-core.js'), join(coreDestDir, 'ffmpeg-core.js')],
-    [join(projectRoot, 'node_modules', '@ffmpeg', 'core-mt', 'dist', 'umd', 'ffmpeg-core.wasm'), join(coreDestDir, 'ffmpeg-core.wasm')],
-    [join(projectRoot, 'node_modules', '@ffmpeg', 'core-mt', 'dist', 'umd', 'ffmpeg-core.worker.js'), join(coreDestDir, 'ffmpeg-core.worker.js')],
-    // UMD-обёртка самого @ffmpeg/ffmpeg (глобальный window.FFmpegWASM).
-    [join(projectRoot, 'node_modules', '@ffmpeg', 'ffmpeg', 'dist', 'umd', 'ffmpeg.js'), join(destDir, 'ffmpeg.js')],
-    [join(projectRoot, 'node_modules', '@ffmpeg', 'ffmpeg', 'dist', 'umd', '814.ffmpeg.js'), join(destDir, '814.ffmpeg.js')],
-];
+mkdirSync(destDir, { recursive: true });
 
-for (const [from, to] of copies) {
-    copyFileSync(from, to);
+for (const file of files) {
+    copyFileSync(join(srcDir, file), join(destDir, file));
 }
 
-console.log(`[copy-ffmpeg-core] Скопировано ${copies.length} файлов в public/ffmpeg`);
+console.log(`[copy-ffmpeg-core] Скопировано ${files.length} файлов в public/ffmpeg/core`);
