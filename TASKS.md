@@ -1,0 +1,157 @@
+# TASKS.md — MicroCrop
+
+**Основано на:** [SPECIFICATION.md](SPECIFICATION.md), [ARCHITECTURE.md](ARCHITECTURE.md)
+**Версия:** 1.0
+**Дата:** 2026-09-18
+
+Чек-лист атомарных задач для реализации MVP. Задачи сгруппированы по фазам в порядке рекомендуемого выполнения; внутри фазы порядок также в целом последовательный.
+
+---
+
+### Phase 1: Environment & Project Setup
+
+- [ ] Task 1.1: Инициализировать Laravel 10/11 проект (`composer create-project laravel/laravel`), выбрать PHP 8.2+.
+- [ ] Task 1.2: Настроить `.env` под локальную БД (`DB_HOST=127.0.0.1`, `DB_PORT=3306`, `DB_DATABASE=microcrop`, `DB_USERNAME=mysql`, `DB_PASSWORD=mysql`).
+- [ ] Task 1.3: Создать БД `microcrop` в MySQL 8.0 и проверить подключение (`php artisan migrate` на пустых миграциях/`php artisan db:show`).
+- [ ] Task 1.4: Установить и настроить Vite + React 18 внутри Laravel (`laravel/vite-plugin`, `@vitejs/plugin-react`) вместо стандартного Blade-only стека.
+- [ ] Task 1.5: Зафиксировать версию Node.js в `.nvmrc`/`package.json` (`engines.node: "18.x"`), задокументировать fallback на Node 16 с флагом `--openssl-legacy-provider`.
+- [ ] Task 1.6: Настроить CORS в Laravel (`config/cors.php`) для API-маршрутов `/api/*`.
+- [ ] Task 1.7: Настроить middleware для COOP/COEP заголовков (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`) — обязательное условие для `SharedArrayBuffer` в многопоточном режиме FFmpeg.wasm.
+- [ ] Task 1.8: Настроить структуру Blade-layout (`resources/views/layouts/seo.blade.php`) как SSR-обёртку для React SPA (точка монтирования `#microcrop-app`).
+- [ ] Task 1.9: Настроить базовую структуру каталогов фронтенда (`resources/js/components`, `resources/js/hooks`, `resources/js/lib`, `resources/js/pages`).
+- [ ] Task 1.10: Настроить линтинг/форматирование (ESLint + Prettier для JS/React, Laravel Pint для PHP).
+- [ ] Task 1.11: Настроить `.env.example` и `README.md` с инструкцией по локальному запуску (без секретов).
+- [ ] Task 1.12: Настроить git-репозиторий: `.gitignore` (node_modules, vendor, .env, storage/*.key), базовый CI-скелет (опционально).
+
+---
+
+### Phase 2: SEO & Meta Management
+
+- [ ] Task 2.1: Создать конфиг посадочных страниц `config/landings.php` (slug, title, description, h1, preset, og_image, faq).
+- [ ] Task 2.2: Реализовать `LandingController@show($slug)`, отдающий Blade-view с данными из конфига.
+- [ ] Task 2.3: Разработать механизм динамических мета-тегов в `layouts/seo.blade.php` (Title, Description, Canonical, Open Graph, Twitter Card).
+- [ ] Task 2.4: Добавить JSON-LD структурированные данные (`SoftwareApplication`, `FAQPage`) в layout.
+- [ ] Task 2.5: Создать посадочную страницу `/` (главная, свободный режим без пресета).
+- [ ] Task 2.6: Создать посадочную страницу `/crop-video-online` (общий крон/кроп-запрос).
+- [ ] Task 2.7: Создать посадочную страницу `/crop-for-reels` (пресет 9:16, под Reels/Shorts/TikTok/VK Клипы).
+- [ ] Task 2.8: Создать посадочную страницу `/trim-video` (пресет trim-only, без crop-контролов по умолчанию).
+- [ ] Task 2.9: Создать посадочную страницу `/circle-video-telegram` (пресет 1:1 + маска круга).
+- [ ] Task 2.10: Создать посадочную страницу `/crop-square-1-1` (пресет 1:1).
+- [ ] Task 2.11: Написать SEO-текстовый контент и FAQ-блоки для каждой посадочной страницы (индексируемый HTML в Blade, вне React-компонента).
+- [ ] Task 2.12: Реализовать `SitemapController@index`, генерирующий `sitemap.xml` из `config/landings.php`.
+- [ ] Task 2.13: Реализовать маршрут `/robots.txt` с указанием `Sitemap:` и `Disallow: /api/`, `/admin/`.
+- [ ] Task 2.14: Подготовить OG-изображения (`/images/og/*.jpg`) для каждой посадочной страницы.
+- [ ] Task 2.15: Проверить корректность мета-тегов и OG-карточек через валидаторы (Google Rich Results Test, OpenGraph debugger).
+
+---
+
+### Phase 3: Database & Models (Laravel)
+
+- [ ] Task 3.1: Создать миграцию и модель `User` (email, password_hash nullable, email_verified_at) — под будущий личный кабинет/guest-flow.
+- [ ] Task 3.2: Создать миграцию и модель `Order` (user_id nullable, guest_email, product_type, amount, currency, status enum, payment_id, raw_response json).
+- [ ] Task 3.3: Создать миграцию и модель `AccessToken` (token_hash unique, order_id FK, expires_at, is_used, used_at).
+- [ ] Task 3.4: Настроить связи Eloquent: `User hasMany Order`, `Order hasOne AccessToken`, `AccessToken belongsTo Order`.
+- [ ] Task 3.5: Настроить `casts` в моделях (`amount` → integer/копейки, `raw_response` → array, `status` → enum/строка с constants).
+- [ ] Task 3.6: Добавить индексы БД (`orders.status + created_at`, `access_tokens.token_hash + expires_at`) в миграциях.
+- [ ] Task 3.7: (Опционально, v1.1) Создать миграцию и модель `LandingPage` для переноса `config/landings.php` в БД.
+- [ ] Task 3.8: Написать Factory и Seeder для `Order`/`AccessToken` для тестового окружения.
+- [ ] Task 3.9: Прогнать `php artisan migrate` на локальной БД `microcrop` и проверить схему (`php artisan db:table orders` и т.д.).
+
+---
+
+### Phase 4: Robokassa Payment Service (Backend)
+
+- [ ] Task 4.1: Добавить конфиг `config/robokassa.php` (merchant_login, password1, password2, base_url, is_test, prices по `product_type`).
+- [ ] Task 4.2: Создать `RobokassaService` с методом `buildPaymentUrl()` — формирование URL оплаты с MD5-подписью (`MerchantLogin:OutSum:InvId:Password1`).
+- [ ] Task 4.3: Реализовать в `RobokassaService` метод `verifyCallbackSignature()` — проверка входящей подписи (`OutSum:InvId:Password2`) с `hash_equals`.
+- [ ] Task 4.4: Создать `CreateOrderRequest` (Form Request) с валидацией `product_type`, `guest_email`.
+- [ ] Task 4.5: Реализовать `PaymentsController@create` (`POST /api/payments/create`) — создание `Order(status=pending)` и возврат `payment_url`.
+- [ ] Task 4.6: Реализовать `PaymentsController@callback` (`POST /api/payments/callback`) — валидация подписи, обновление `Order(status=paid)`, генерация `AccessToken`.
+- [ ] Task 4.7: Реализовать `PaymentsController@status` (`GET /api/payments/{order}/status`) — polling статуса заказа и одноразовая выдача raw-токена фронтенду.
+- [ ] Task 4.8: Исключить `POST /api/payments/callback` из CSRF-проверки (`VerifyCsrfToken::$except`), т.к. вызывается сервером Robokassa напрямую.
+- [ ] Task 4.9: Настроить rate-limiting (`throttle:60,1`) на `/api/payments/create` и `/api/tokens/*`.
+- [ ] Task 4.10: Реализовать `TokensController@validate` (`POST /api/tokens/validate`) — проверка `token_hash` и срока действия.
+- [ ] Task 4.11: Зарегистрировать все маршруты в `routes/api.php` с префиксом `/api`.
+- [ ] Task 4.12: Настроить логирование неуспешных/подозрительных callback-запросов (невалидная подпись) через `Log::warning`.
+- [ ] Task 4.13: Настроить интеграцию с приложением «Мой налог» / фискализацию чеков для самозанятого (НПД) через личный кабинет Robokassa (конфигурационный шаг, не код).
+- [ ] Task 4.14: Написать Unit-тест на `RobokassaService::buildPaymentUrl()` (корректность подписи и параметров URL).
+- [ ] Task 4.15: Написать Unit-тест на `RobokassaService::verifyCallbackSignature()` (валидная/невалидная подпись).
+- [ ] Task 4.16: Написать Feature-тест на `POST /api/payments/create` (создание заказа, статус `pending`, корректный `payment_url`).
+- [ ] Task 4.17: Написать Feature-тест на `POST /api/payments/callback` (успешная оплата → `status=paid`, создан `AccessToken`; невалидная подпись → `400`).
+- [ ] Task 4.18: Написать Feature-тест на `POST /api/tokens/validate` (валидный/просроченный/несуществующий токен).
+
+---
+
+### Phase 5: Frontend Core & FFmpeg.wasm Integration
+
+- [ ] Task 5.1: Установить `@ffmpeg/ffmpeg` (v0.12+) и `@ffmpeg/util` через npm.
+- [ ] Task 5.2: Настроить загрузку `core.wasm`/`worker.js` (self-hosted в `public/ffmpeg/` либо через CDN) с учётом COOP/COEP заголовков (Task 1.7).
+- [ ] Task 5.3: Разработать компонент `VideoUploader.jsx` (Drag-and-Drop зона + fallback `<input type="file">`).
+- [ ] Task 5.4: Добавить в `VideoUploader.jsx` клиентскую валидацию формата (MP4/MOV/WebM/AVI) и максимального размера файла с понятным сообщением об ошибке.
+- [ ] Task 5.5: Разработать компонент видео-плеера предпросмотра (`VideoPreview.jsx`) на базе `<video>` + `URL.createObjectURL`.
+- [ ] Task 5.6: Разработать компонент `CropOverlay.jsx` — рамка кадрирования с ресайзом за угловые маркеры и перетаскиванием.
+- [ ] Task 5.7: Реализовать пресеты соотношений сторон в `CropOverlay.jsx`: 16:9, 9:16, 1:1, Free.
+- [ ] Task 5.8: Реализовать пересчёт координат Crop Box из координат превью (CSS px) в координаты реального разрешения видео (для передачи в FFmpeg-фильтр `crop=w:h:x:y`).
+- [ ] Task 5.9: Разработать компонент `TimelineTrimmer.jsx` — таймлайн с двумя хендлами (начало/конец) и текстовым отображением `чч:мм:сс.мс`.
+- [ ] Task 5.10: Добавить в `TimelineTrimmer.jsx` возможность точного ручного ввода времени начала/конца.
+- [ ] Task 5.11: (Опционально) Реализовать генерацию миниатюр кадров (thumbnails) для таймлайна.
+- [ ] Task 5.12: Написать хук `useFFmpeg.js` — инициализация `FFmpeg` инстанса, загрузка core в Web Worker, метод `load()`.
+- [ ] Task 5.13: Реализовать в `useFFmpeg.js` метод записи входного файла в virtual FS (`writeFile('input.mp4', ...)`).
+- [ ] Task 5.14: Реализовать модуль `lib/ffmpegPipeline.js` с функцией `buildFilterChain({ crop, hasProAccess, outputHeight })`, собирающей строку `-vf`.
+- [ ] Task 5.15: Реализовать формирование полной FFmpeg-команды (crop + trim `-ss`/`-to` + кодек `libx264`/`aac`) в `ffmpegPipeline.js`.
+- [ ] Task 5.16: Реализовать в `useFFmpeg.js` запуск `exec()` с командой и подписку на прогресс (`ffmpeg.on('progress', ...)`) для индикатора выполнения.
+- [ ] Task 5.17: Реализовать чтение результата из virtual FS (`readFile('output.mp4')`) и формирование `Blob`/download-ссылки.
+- [ ] Task 5.18: Загрузить шрифт (`Inter-Regular.ttf`) в virtual FS ffmpeg.wasm перед рендером для корректной работы `drawtext`.
+- [ ] Task 5.19: Реализовать наложение водяного знака "microcrop" через `drawtext` (полупрозрачный текст, правый нижний угол, отступ ~2% от высоты кадра) для бесплатного режима — см. [ARCHITECTURE.md §4](ARCHITECTURE.md#4-watermark--ffmpeg-filter-specification).
+- [ ] Task 5.20: Реализовать адаптивный расчёт `fontsize`/отступов водяного знака относительно `outputHeight` (формулы из ARCHITECTURE.md §4.4).
+- [ ] Task 5.21: Разработать компонент `RenderingScreen.jsx` — экран ожидания рендера с прогресс-баром и слотом для рекламного блока.
+- [ ] Task 5.22: Реализовать обработку ошибок рендера (нехватка памяти, неподдерживаемый кодек) с понятным UI-сообщением и возможностью повторить попытку.
+- [ ] Task 5.23: Реализовать кнопку «Скачать» с именем файла вида `microcrop_<timestamp>.mp4`.
+- [ ] Task 5.24: Собрать единый экран/страницу редактора (`EditorPage.jsx`), объединяющий Uploader → Preview/CropOverlay → TimelineTrimmer → Render → Download.
+- [ ] Task 5.25: Реализовать применение `preset` (из `data-preset` атрибута Blade-страницы, см. ARCHITECTURE.md §2.1) как начальной конфигурации `CropOverlay`/`TimelineTrimmer` при монтировании React-приложения.
+- [ ] Task 5.26: Проверить, что весь пайплайн рендера выполняется в Web Worker и не блокирует UI-поток (профилирование в DevTools).
+
+---
+
+### Phase 6: Monetization (РСЯ Ads & PRO Flow)
+
+- [ ] Task 6.1: Создать компонент `YandexAdBlock.jsx` с параметром `placement` (`header`/`sidebar`/`renderScreen`) и инициализацией через `window.yaContextCb`.
+- [ ] Task 6.2: Реализовать однократную асинхронную загрузку скрипта РСЯ (`https://an.yandex.ru/system/context.js`) в точке входа приложения.
+- [ ] Task 6.3: Реализовать таймаут-стражу (~3с) и fallback-состояние `.ad-fallback` в `YandexAdBlock.jsx` для случая блокировки рекламы (AdBlock).
+- [ ] Task 6.4: Обернуть инициализацию `Ya.Context.AdvManager.render()` в `try/catch`, чтобы сбой рекламного скрипта не ронял остальное приложение.
+- [ ] Task 6.5: Разместить `YandexAdBlock` в шапке (`header`) общего layout.
+- [ ] Task 6.6: Разместить `YandexAdBlock` в боковой панели (`sidebar`) редактора, скрываемой на мобильной раскладке (`<1024px`).
+- [ ] Task 6.7: Разместить `YandexAdBlock` на экране ожидания рендера (`renderScreen`, см. Task 5.21).
+- [ ] Task 6.8: Разработать модальное окно `ProUpsellModal.jsx` — предложение купить PRO-доступ (снятие водяного знака / ускоренная обработка / соцсеть-пресеты) с указанием цены.
+- [ ] Task 6.9: Реализовать вызов `POST /api/payments/create` из `ProUpsellModal.jsx` и редирект пользователя на полученный `payment_url` Robokassa.
+- [ ] Task 6.10: Реализовать экран/состояние «Ожидание оплаты» с polling `GET /api/payments/{order_id}/status` после возврата пользователя с Robokassa.
+- [ ] Task 6.11: Реализовать сохранение полученного raw-токена в `localStorage` и немедленную очистку токена из URL (`history.replaceState`) при возврате через query-параметр.
+- [ ] Task 6.12: Написать хук `useProAccess.js` — проверка токена из `localStorage` через `POST /api/tokens/validate` при старте сессии редактора.
+- [ ] Task 6.13: Связать результат `useProAccess.js` (`hasProAccess`) с `buildFilterChain()` (Task 5.14) — отключение фильтра `drawtext` при валидном PRO-токене.
+- [ ] Task 6.14: Реализовать скрытие/невыполнение рендера рекламных блоков (`YandexAdBlock`) на экранах, где это мешает PRO-опыту (по решению продукта — опционально для MVP).
+- [ ] Task 6.15: Реализовать обработку истёкшего/использованного токена — повторное предложение оплаты через `ProUpsellModal.jsx`.
+- [ ] Task 6.16: Добавить UI-индикатор текущего статуса пользователя (Free / PRO до `expires_at`) в шапке редактора.
+
+---
+
+### Phase 7: E2E Testing & Polish
+
+- [ ] Task 7.1: Проверить полный цикл: загрузка видео → Crop (все пресеты 16:9/9:16/1:1/Free) → Trim → рендер → скачивание файла с водяным знаком (Free-режим).
+- [ ] Task 7.2: Проверить полный цикл рендера без водяного знака после валидного PRO-токена.
+- [ ] Task 7.3: Провести тестовый платёж через Robokassa в тестовом режиме (`IsTest=1`) и убедиться, что callback корректно создаёт `AccessToken`.
+- [ ] Task 7.4: Проверить обработку невалидной/поддельной подписи в `callback` (должен вернуть `400`, не создавать токен).
+- [ ] Task 7.5: Проверить отображение рекламных блоков РСЯ во всех трёх точках размещения (header, sidebar, renderScreen) на десктопе и мобильной раскладке.
+- [ ] Task 7.6: Проверить сценарий с включённым AdBlock — приложение и рендер видео должны продолжать работать без ошибок.
+- [ ] Task 7.7: Проверить SEO-страницы на корректность мета-тегов, OG-карточек и наличие индексируемого текстового контента (просмотр исходного HTML без выполнения JS).
+- [ ] Task 7.8: Проверить корректность генерации `sitemap.xml` и `robots.txt` (валидные XML/текст, актуальный список URL).
+- [ ] Task 7.9: Проверить работу `SharedArrayBuffer`/многопоточного режима FFmpeg.wasm в целевых браузерах (Chrome, Firefox, Edge, Safari) — корректность COOP/COEP заголовков.
+- [ ] Task 7.10: Проверить поведение при превышении лимита размера файла и при неподдерживаемом формате (понятная ошибка, без зависания вкладки).
+- [ ] Task 7.11: Провести нагрузочную проверку рендера крупного файла (близко к максимально допустимому размеру) — отсутствие зависания UI-потока.
+- [ ] Task 7.12: Прогнать полный набор PHP Unit/Feature тестов (`php artisan test`) и убедиться в отсутствии регрессий.
+- [ ] Task 7.13: Проверить адаптивность интерфейса редактора и посадочных страниц на мобильных устройствах (виджет загрузки, Crop Box, таймлайн, модальные окна оплаты).
+- [ ] Task 7.14: Финальный аудит безопасности: проверка, что raw PRO-токен не попадает в логи/историю браузера, что `access_tokens.token_hash` не хранит значение в открытом виде.
+- [ ] Task 7.15: Подготовить чек-лист пред-релизного деплоя (переключение Robokassa из тестового в боевой режим, проверка `.env` продакшена, HTTPS, реальные ad-block ID РСЯ).
+
+---
+
+*Чек-лист синхронизирован с [SPECIFICATION.md](SPECIFICATION.md) и [ARCHITECTURE.md](ARCHITECTURE.md). По мере реализации отмечайте задачи `[x]` и уточняйте состав при появлении новых требований (v1.1/v2).*
