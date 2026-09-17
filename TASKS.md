@@ -10,52 +10,52 @@
 
 ### Phase 1: Environment & Project Setup
 
-- [ ] Task 1.1: Инициализировать Laravel 10/11 проект (`composer create-project laravel/laravel`), выбрать PHP 8.2+.
-- [ ] Task 1.2: Настроить `.env` под локальную БД (`DB_HOST=127.0.0.1`, `DB_PORT=3306`, `DB_DATABASE=microcrop`, `DB_USERNAME=mysql`, `DB_PASSWORD=mysql`).
-- [ ] Task 1.3: Создать БД `microcrop` в MySQL 8.0 и проверить подключение (`php artisan migrate` на пустых миграциях/`php artisan db:show`).
-- [ ] Task 1.4: Установить и настроить Vite + React 18 внутри Laravel (`laravel/vite-plugin`, `@vitejs/plugin-react`) вместо стандартного Blade-only стека.
-- [ ] Task 1.5: Зафиксировать версию Node.js в `.nvmrc`/`package.json` (`engines.node: "18.x"`), задокументировать fallback на Node 16 с флагом `--openssl-legacy-provider`.
-- [ ] Task 1.6: Настроить CORS в Laravel (`config/cors.php`) для API-маршрутов `/api/*`.
-- [ ] Task 1.7: Настроить middleware для COOP/COEP заголовков (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`) — обязательное условие для `SharedArrayBuffer` в многопоточном режиме FFmpeg.wasm.
-- [ ] Task 1.8: Настроить структуру Blade-layout (`resources/views/layouts/seo.blade.php`) как SSR-обёртку для React SPA (точка монтирования `#microcrop-app`).
-- [ ] Task 1.9: Настроить базовую структуру каталогов фронтенда (`resources/js/components`, `resources/js/hooks`, `resources/js/lib`, `resources/js/pages`).
+- [x] Task 1.1: Инициализировать Laravel 10/11 проект (`composer create-project laravel/laravel`), выбрать PHP 8.2+.
+- [x] Task 1.2: Настроить `.env` под локальную БД (`DB_HOST=127.0.0.1`, `DB_PORT=3306`, `DB_DATABASE=microcrop`, `DB_USERNAME=mysql`, `DB_PASSWORD=mysql`).
+- [x] Task 1.3: Создать БД `microcrop` в MySQL 8.0 и проверить подключение (`php artisan migrate` на пустых миграциях/`php artisan db:show`).
+- [x] Task 1.4: Установить и настроить Vite + React 18 внутри Laravel (`laravel/vite-plugin`, `@vitejs/plugin-react`) вместо стандартного Blade-only стека.
+- [x] Task 1.5: Зафиксировать версию Node.js в `.nvmrc`/`package.json` (`engines.node: "18.x"`), задокументировать fallback на Node 16 с флагом `--openssl-legacy-provider`.
+- [x] Task 1.6: Настроить CORS в Laravel (`config/cors.php`) для API-маршрутов `/api/*`.
+- [x] Task 1.7: Настроить middleware для COOP/COEP заголовков (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`) — обязательное условие для `SharedArrayBuffer` в многопоточном режиме FFmpeg.wasm.
+- [x] Task 1.8: Настроить структуру Blade-layout (`resources/views/layouts/seo.blade.php`) как SSR-обёртку для React SPA (точка монтирования `#microcrop-app`).
+- [x] Task 1.9: Настроить базовую структуру каталогов фронтенда (`resources/js/components`, `resources/js/hooks`, `resources/js/lib`, `resources/js/pages`).
 - [ ] Task 1.10: Настроить линтинг/форматирование (ESLint + Prettier для JS/React, Laravel Pint для PHP).
-- [ ] Task 1.11: Настроить `.env.example` и `README.md` с инструкцией по локальному запуску (без секретов).
-- [ ] Task 1.12: Настроить git-репозиторий: `.gitignore` (node_modules, vendor, .env, storage/*.key), базовый CI-скелет (опционально).
+- [x] Task 1.11: Настроить `.env.example` и `README.md` с инструкцией по локальному запуску (без секретов).
+- [x] Task 1.12: Настроить git-репозиторий: `.gitignore` (node_modules, vendor, .env, storage/*.key), базовый CI-скелет (опционально). *(CI-скелет не создавался — опционален)*
 
 ---
 
 ### Phase 2: SEO & Meta Management
 
-- [ ] Task 2.1: Создать конфиг посадочных страниц `config/landings.php` (slug, title, description, h1, preset, og_image, faq).
-- [ ] Task 2.2: Реализовать `LandingController@show($slug)`, отдающий Blade-view с данными из конфига.
-- [ ] Task 2.3: Разработать механизм динамических мета-тегов в `layouts/seo.blade.php` (Title, Description, Canonical, Open Graph, Twitter Card).
-- [ ] Task 2.4: Добавить JSON-LD структурированные данные (`SoftwareApplication`, `FAQPage`) в layout.
-- [ ] Task 2.5: Создать посадочную страницу `/` (главная, свободный режим без пресета).
-- [ ] Task 2.6: Создать посадочную страницу `/crop-video-online` (общий крон/кроп-запрос).
-- [ ] Task 2.7: Создать посадочную страницу `/crop-for-reels` (пресет 9:16, под Reels/Shorts/TikTok/VK Клипы).
-- [ ] Task 2.8: Создать посадочную страницу `/trim-video` (пресет trim-only, без crop-контролов по умолчанию).
-- [ ] Task 2.9: Создать посадочную страницу `/circle-video-telegram` (пресет 1:1 + маска круга).
-- [ ] Task 2.10: Создать посадочную страницу `/crop-square-1-1` (пресет 1:1).
-- [ ] Task 2.11: Написать SEO-текстовый контент и FAQ-блоки для каждой посадочной страницы (индексируемый HTML в Blade, вне React-компонента).
-- [ ] Task 2.12: Реализовать `SitemapController@index`, генерирующий `sitemap.xml` из `config/landings.php`.
-- [ ] Task 2.13: Реализовать маршрут `/robots.txt` с указанием `Sitemap:` и `Disallow: /api/`, `/admin/`.
-- [ ] Task 2.14: Подготовить OG-изображения (`/images/og/*.jpg`) для каждой посадочной страницы.
-- [ ] Task 2.15: Проверить корректность мета-тегов и OG-карточек через валидаторы (Google Rich Results Test, OpenGraph debugger).
+- [x] Task 2.1: Создать конфиг посадочных страниц `config/landings.php` (slug, title, description, h1, preset, og_image, faq).
+- [x] Task 2.2: Реализовать `LandingController@show($slug)`, отдающий Blade-view с данными из конфига.
+- [x] Task 2.3: Разработать механизм динамических мета-тегов в `layouts/seo.blade.php` (Title, Description, Canonical, Open Graph, Twitter Card).
+- [x] Task 2.4: Добавить JSON-LD структурированные данные (`SoftwareApplication`, `FAQPage`) в layout.
+- [x] Task 2.5: Создать посадочную страницу `/` (главная, свободный режим без пресета).
+- [x] Task 2.6: Создать посадочную страницу `/crop-video-online` (общий крон/кроп-запрос).
+- [x] Task 2.7: Создать посадочную страницу `/crop-for-reels` (пресет 9:16, под Reels/Shorts/TikTok/VK Клипы).
+- [x] Task 2.8: Создать посадочную страницу `/trim-video` (пресет trim-only, без crop-контролов по умолчанию).
+- [x] Task 2.9: Создать посадочную страницу `/circle-video-telegram` (пресет 1:1 + маска круга).
+- [x] Task 2.10: Создать посадочную страницу `/crop-square-1-1` (пресет 1:1).
+- [x] Task 2.11: Написать SEO-текстовый контент и FAQ-блоки для каждой посадочной страницы (индексируемый HTML в Blade, вне React-компонента). *(базовый контент по 2 FAQ на страницу; финальный копирайтинг — предмет дальнейшей доработки)*
+- [x] Task 2.12: Реализовать `SitemapController@index`, генерирующий `sitemap.xml` из `config/landings.php`.
+- [x] Task 2.13: Реализовать маршрут `/robots.txt` с указанием `Sitemap:` и `Disallow: /api/`, `/admin/`.
+- [ ] Task 2.14: Подготовить OG-изображения (`/images/og/*.jpg`) для каждой посадочной страницы. *(требуются готовые дизайн-ассеты — вне текущей backend-сессии)*
+- [ ] Task 2.15: Проверить корректность мета-тегов и OG-карточек через валидаторы (Google Rich Results Test, OpenGraph debugger). *(требует публичного/задеплоенного URL)*
 
 ---
 
 ### Phase 3: Database & Models (Laravel)
 
-- [ ] Task 3.1: Создать миграцию и модель `User` (email, password_hash nullable, email_verified_at) — под будущий личный кабинет/guest-flow.
-- [ ] Task 3.2: Создать миграцию и модель `Order` (user_id nullable, guest_email, product_type, amount, currency, status enum, payment_id, raw_response json).
-- [ ] Task 3.3: Создать миграцию и модель `AccessToken` (token_hash unique, order_id FK, expires_at, is_used, used_at).
-- [ ] Task 3.4: Настроить связи Eloquent: `User hasMany Order`, `Order hasOne AccessToken`, `AccessToken belongsTo Order`.
-- [ ] Task 3.5: Настроить `casts` в моделях (`amount` → integer/копейки, `raw_response` → array, `status` → enum/строка с constants).
-- [ ] Task 3.6: Добавить индексы БД (`orders.status + created_at`, `access_tokens.token_hash + expires_at`) в миграциях.
+- [x] Task 3.1: Создать миграцию и модель `User` (email, password_hash nullable, email_verified_at) — под будущий личный кабинет/guest-flow. *(миграция — стандартная из скелета Laravel; добавлена связь `orders()`)*
+- [x] Task 3.2: Создать миграцию и модель `Order` (user_id nullable, guest_email, product_type, amount, currency, status enum, payment_id, raw_response json).
+- [x] Task 3.3: Создать миграцию и модель `AccessToken` (token_hash unique, order_id FK, expires_at, is_used, used_at). *(в примере в начале раздела фигурировало имя `ProToken` — реализовано как `AccessToken`/`access_tokens`, в соответствии с ARCHITECTURE.md §3.3)*
+- [x] Task 3.4: Настроить связи Eloquent: `User hasMany Order`, `Order hasOne AccessToken`, `AccessToken belongsTo Order`.
+- [x] Task 3.5: Настроить `casts` в моделях (`amount` → integer/копейки, `raw_response` → array, `status` → enum/строка с constants).
+- [x] Task 3.6: Добавить индексы БД (`orders.status + created_at`, `access_tokens.token_hash + expires_at`) в миграциях.
 - [ ] Task 3.7: (Опционально, v1.1) Создать миграцию и модель `LandingPage` для переноса `config/landings.php` в БД.
 - [ ] Task 3.8: Написать Factory и Seeder для `Order`/`AccessToken` для тестового окружения.
-- [ ] Task 3.9: Прогнать `php artisan migrate` на локальной БД `microcrop` и проверить схему (`php artisan db:table orders` и т.д.).
+- [x] Task 3.9: Прогнать `php artisan migrate` на локальной БД `microcrop` и проверить схему (`php artisan db:table orders` и т.д.). *(проверено `migrate:status` + sanity-тест моделей через tinker, включая cascade-delete)*
 
 ---
 

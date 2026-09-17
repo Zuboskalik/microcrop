@@ -1,3 +1,25 @@
+### Laravel
+/vendor/
+/public/build/
+/public/hot
+/storage/*.key
+/storage/pail
+/storage/app/*
+!/storage/app/.gitignore
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitignore
+/database/*.sqlite
+.phpunit.result.cache
+auth.json
+
 ### Node
 # Dependencies
 node_modules/
