@@ -1,19 +1,17 @@
 @extends('layouts.seo')
 
 @section('content')
-    @if(!empty($meta['intro']))
-        <p class="landing-intro">{{ $meta['intro'] }}</p>
-    @endif
-
     @if(!empty($meta['faq']))
-        <section class="landing-faq" aria-label="Частые вопросы">
-            <h2>Частые вопросы</h2>
-            @foreach($meta['faq'] as $item)
-                <article class="landing-faq__item">
-                    <h3>{{ $item['q'] }}</h3>
-                    <p>{{ $item['a'] }}</p>
-                </article>
-            @endforeach
+        <section class="mx-auto max-w-2xl" aria-label="Частые вопросы">
+            <h2 class="text-center text-2xl font-bold text-slate-900">Частые вопросы</h2>
+            <div class="mt-6 space-y-4">
+                @foreach($meta['faq'] as $item)
+                    <article class="card p-5">
+                        <h3 class="font-semibold text-slate-900">{{ $item['q'] }}</h3>
+                        <p class="mt-1 text-sm text-slate-500">{{ $item['a'] }}</p>
+                    </article>
+                @endforeach
+            </div>
         </section>
 
         <script type="application/ld+json">

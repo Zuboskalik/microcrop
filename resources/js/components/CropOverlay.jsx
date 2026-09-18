@@ -203,14 +203,22 @@ export default function CropOverlay({ naturalWidth, naturalHeight, preset, onPre
         startDrag({ type: 'resize', handle, anchor });
     }, [box, startDrag]);
 
+    const HANDLE_POSITION_CLASSES = {
+        tl: '-left-2 -top-2 cursor-nwse-resize',
+        tr: '-right-2 -top-2 cursor-nesw-resize',
+        bl: '-left-2 -bottom-2 cursor-nesw-resize',
+        br: '-right-2 -bottom-2 cursor-nwse-resize',
+    };
+
     return (
-        <div className="crop-overlay" ref={containerRef}>
-            <div className="crop-overlay__presets" role="group" aria-label="Соотношение сторон">
+        <div className="absolute inset-0 touch-none" ref={containerRef}>
+            <div className="absolute left-2 top-2 z-10 flex gap-1.5 rounded-lg bg-slate-900/70 p-1 backdrop-blur-sm" role="group" aria-label="Соотношение сторон">
                 {Object.keys(CROP_PRESETS).map((key) => (
                     <button
                         key={key}
                         type="button"
-                        className={`crop-overlay__preset-btn${preset === key ? ' is-active' : ''}`}
+                        className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors
+                            ${preset === key ? 'bg-brand-500 text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}
                         onClick={() => onPresetChange(key)}
                     >
                         {key === 'free' ? 'Free' : key}
@@ -220,18 +228,25 @@ export default function CropOverlay({ naturalWidth, naturalHeight, preset, onPre
 
             {box ? (
                 <>
-                    <div className="crop-overlay__mask" style={{
+                    <div className="pointer-events-none absolute inset-0 bg-black/50" style={{
                         clipPath: `polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, ${box.x}px ${box.y}px, ${box.x}px ${box.y + box.h}px, ${box.x + box.w}px ${box.y + box.h}px, ${box.x + box.w}px ${box.y}px, ${box.x}px ${box.y}px)`,
                     }} />
                     <div
-                        className="crop-overlay__box"
+                        className="absolute cursor-move border-2 border-white shadow-[0_0_0_1px_rgba(59,130,246,0.9)]"
                         style={{ left: box.x, top: box.y, width: box.w, height: box.h }}
                         onPointerDown={onBodyPointerDown}
                     >
+                        {/* Направляющие третей — как в профессиональных видеоредакторах */}
+                        <div className="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3">
+                            {Array.from({ length: 9 }).map((_, i) => (
+                                <div key={i} className="border border-white/25" />
+                            ))}
+                        </div>
+
                         {HANDLES.map((handle) => (
                             <div
                                 key={handle}
-                                className={`crop-overlay__handle crop-overlay__handle--${handle}`}
+                                className={`absolute h-4 w-4 rounded-full border-2 border-white bg-brand-500 shadow-md ${HANDLE_POSITION_CLASSES[handle]}`}
                                 onPointerDown={onHandlePointerDown(handle)}
                             />
                         ))}

@@ -99,41 +99,49 @@ export default function TimelineTrimmer({ duration, start, end, onChange }) {
     };
 
     return (
-        <div className="timeline-trimmer">
-            <div className="timeline-trimmer__track" ref={trackRef}>
+        <div className="card mt-4 p-5">
+            <div className="flex items-center justify-between text-xs font-medium text-slate-400">
+                <span>0:00</span>
+                <span>Таймлайн</span>
+                <span>{formatTime(duration).slice(0, 8)}</span>
+            </div>
+
+            <div className="relative mt-3 h-2 rounded-full bg-slate-200" ref={trackRef}>
                 <div
-                    className="timeline-trimmer__selection"
+                    className="absolute top-0 h-2 rounded-full bg-gradient-to-r from-brand-500 to-cyan-500"
                     style={{ left: `${percentFor(start)}%`, width: `${percentFor(end - start)}%` }}
                 />
                 <div
-                    className="timeline-trimmer__handle timeline-trimmer__handle--start"
+                    className="absolute top-1/2 -ml-2.5 h-5 w-5 -translate-y-1/2 cursor-ew-resize rounded-full border-2 border-brand-500 bg-white shadow-md transition-transform hover:scale-110"
                     style={{ left: `${percentFor(start)}%` }}
                     onPointerDown={startDragging('start')}
                 />
                 <div
-                    className="timeline-trimmer__handle timeline-trimmer__handle--end"
+                    className="absolute top-1/2 -ml-2.5 h-5 w-5 -translate-y-1/2 cursor-ew-resize rounded-full border-2 border-brand-500 bg-white shadow-md transition-transform hover:scale-110"
                     style={{ left: `${percentFor(end)}%` }}
                     onPointerDown={startDragging('end')}
                 />
             </div>
 
-            <div className="timeline-trimmer__inputs">
-                <label>
-                    Начало
+            <div className="mt-4 flex items-center gap-4 text-sm">
+                <label className="flex-1">
+                    <span className="mb-1 block text-xs font-medium text-slate-400">Начало</span>
                     <input
                         type="text"
                         defaultValue={formatTime(start)}
                         key={`start-${start}`}
                         onBlur={onManualStartChange}
+                        className="w-full rounded-lg border border-slate-200 px-3 py-1.5 font-mono text-sm text-slate-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
                     />
                 </label>
-                <label>
-                    Конец
+                <label className="flex-1">
+                    <span className="mb-1 block text-xs font-medium text-slate-400">Конец</span>
                     <input
                         type="text"
                         defaultValue={formatTime(end)}
                         key={`end-${end}`}
                         onBlur={onManualEndChange}
+                        className="w-full rounded-lg border border-slate-200 px-3 py-1.5 font-mono text-sm text-slate-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
                     />
                 </label>
             </div>

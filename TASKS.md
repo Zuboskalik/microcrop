@@ -119,22 +119,24 @@
 
 ### Phase 6: Monetization (РСЯ Ads & PRO Flow)
 
-- [ ] Task 6.1: Создать компонент `YandexAdBlock.jsx` с параметром `placement` (`header`/`sidebar`/`renderScreen`) и инициализацией через `window.yaContextCb`.
-- [ ] Task 6.2: Реализовать однократную асинхронную загрузку скрипта РСЯ (`https://an.yandex.ru/system/context.js`) в точке входа приложения.
-- [ ] Task 6.3: Реализовать таймаут-стражу (~3с) и fallback-состояние `.ad-fallback` в `YandexAdBlock.jsx` для случая блокировки рекламы (AdBlock).
-- [ ] Task 6.4: Обернуть инициализацию `Ya.Context.AdvManager.render()` в `try/catch`, чтобы сбой рекламного скрипта не ронял остальное приложение.
-- [ ] Task 6.5: Разместить `YandexAdBlock` в шапке (`header`) общего layout.
-- [ ] Task 6.6: Разместить `YandexAdBlock` в боковой панели (`sidebar`) редактора, скрываемой на мобильной раскладке (`<1024px`).
-- [ ] Task 6.7: Разместить `YandexAdBlock` на экране ожидания рендера (`renderScreen`, см. Task 5.21).
-- [ ] Task 6.8: Разработать модальное окно `ProUpsellModal.jsx` — предложение купить PRO-доступ (снятие водяного знака / ускоренная обработка / соцсеть-пресеты) с указанием цены.
-- [ ] Task 6.9: Реализовать вызов `POST /api/payments/create` из `ProUpsellModal.jsx` и редирект пользователя на полученный `payment_url` Robokassa.
-- [ ] Task 6.10: Реализовать экран/состояние «Ожидание оплаты» с polling `GET /api/payments/{order_id}/status` после возврата пользователя с Robokassa.
-- [ ] Task 6.11: Реализовать сохранение полученного raw-токена в `localStorage` и немедленную очистку токена из URL (`history.replaceState`) при возврате через query-параметр.
-- [ ] Task 6.12: Написать хук `useProAccess.js` — проверка токена из `localStorage` через `POST /api/tokens/validate` при старте сессии редактора.
-- [ ] Task 6.13: Связать результат `useProAccess.js` (`hasProAccess`) с `buildFilterChain()` (Task 5.14) — отключение фильтра `drawtext` при валидном PRO-токене.
-- [ ] Task 6.14: Реализовать скрытие/невыполнение рендера рекламных блоков (`YandexAdBlock`) на экранах, где это мешает PRO-опыту (по решению продукта — опционально для MVP).
-- [ ] Task 6.15: Реализовать обработку истёкшего/использованного токена — повторное предложение оплаты через `ProUpsellModal.jsx`.
-- [ ] Task 6.16: Добавить UI-индикатор текущего статуса пользователя (Free / PRO до `expires_at`) в шапке редактора.
+- [x] Task 6.1: Создать компонент `YandexAdBlock.jsx` с параметром `placement` (`header`/`sidebar`/`renderScreen`) и инициализацией через `window.yaContextCb`.
+- [x] Task 6.2: Реализовать однократную асинхронную загрузку скрипта РСЯ (`https://an.yandex.ru/system/context.js`) в точке входа приложения.
+- [x] Task 6.3: Реализовать таймаут-стражу (~3с) и fallback-состояние в `YandexAdBlock.jsx` для случая блокировки рекламы (AdBlock) — проверено визуально (заглушка «Реклама» при отсутствии реального block ID).
+- [x] Task 6.4: Обернуть инициализацию `Ya.Context.AdvManager.render()` в `try/catch`, чтобы сбой рекламного скрипта не ронял остальное приложение.
+- [x] Task 6.5: Разместить `YandexAdBlock` в шапке (`header`) общего layout — через React-портал в `#microcrop-ad-header` (Blade остаётся статичным для SEO, слот монтируется из `app.jsx`).
+- [x] Task 6.6: Разместить `YandexAdBlock` в боковой панели (`sidebar`) редактора, скрываемой на мобильной раскладке (`<1024px`, класс `hidden lg:block`).
+- [x] Task 6.7: Разместить `YandexAdBlock` на экране ожидания рендера — реализован `RenderingScreen.jsx` (закрывает и Task 5.21) с прогресс-баром, спиннером и ad-слотом.
+- [x] Task 6.8: Разработать модальное окно `ProUpsellModal.jsx` — предложение купить PRO-доступ с преимуществами и ценой (199 ₽).
+- [x] Task 6.9: Реализовать вызов `POST /api/payments/create` из `ProUpsellModal.jsx` и редирект пользователя на полученный `payment_url` Robokassa — проверено сквозным тестом (создан реальный `Order`, браузер перешёл на auth.robokassa.ru).
+- [x] Task 6.10: Реализовать экран/состояние «Ожидание оплаты» с polling `GET /api/payments/{order_id}/status` после возврата пользователя с Robokassa — индикатор «Ожидаем оплату…» в шапке.
+- [x] Task 6.11: Реализовать сохранение полученного raw-токена в `localStorage` и очистку `?microcrop_token=` из URL (`history.replaceState`) при возврате через query-параметр.
+- [x] Task 6.12: Написать хук `useProAccess.js` — проверка токена из `localStorage` через `POST /api/tokens/validate` при старте сессии редактора.
+- [x] Task 6.13: Связать результат `useProAccess.js` (`hasProAccess`) с рендером (`useFFmpeg.render()` → `buildFilterChain()`) — отключение фильтра `drawtext` при валидном PRO-токене. **Проверено сквозным тестом**: симулирован реальный callback Robokassa → выдан токен → PRO-бейдж в шапке → экспортированный кадр не содержит водяного знака (сравнение с Free-рендером того же клипа).
+- [x] Task 6.14: Реализовать скрытие рекламных блоков на экранах, где это мешает PRO-опыту — `YandexAdBlock` (header/sidebar/renderScreen) не рендерится вовсе при `hasProAccess === true`, подтверждено визуально.
+- [ ] Task 6.15: Реализовать обработку истёкшего/использованного токена — повторное предложение оплаты через `ProUpsellModal.jsx`. *(`useProAccess` уже удаляет истёкший токен из localStorage и возвращает `hasProAccess=false`, из-за чего кнопка «Купить PRO» появляется автоматически; отдельного уведомления «токен истёк, оформите заново» нет.)*
+- [x] Task 6.16: Добавить UI-индикатор текущего статуса пользователя (Free / PRO до `expires_at`) в шапке редактора — `HeaderStatus.jsx`, смонтирован порталом в `#microcrop-header-status`.
+
+**Дизайн/стилизация (сверх исходного объёма Phase 6, по вашему запросу):** полный визуальный редизайн на Tailwind CSS — Hero-секция с градиентным заголовком, карточки с тенями/скруглениями, `VideoUploader` как акцентная drag-and-drop зона с иконкой и hover/active-эффектами, `CropOverlay` с направляющими по третям и стеклянной панелью пресетов, `TimelineTrimmer` с градиентным треком, единая система кнопок (`.btn-primary`/`.btn-secondary`/`.btn-success`/`.btn-pro`) со спиннером состояния загрузки. **Важно:** попутно обнаружен и исправлен баг конфигурации — `tailwind.config.js` не сканировал `.jsx`-файлы (`content: ['./resources/**/*.js', ...]` не покрывал JSX), из-за чего все Tailwind-классы в компонентах вырезались бы при сборке; добавлен `./resources/**/*.jsx` в `content`.
 
 ---
 

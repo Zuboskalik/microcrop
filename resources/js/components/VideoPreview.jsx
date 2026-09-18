@@ -41,27 +41,29 @@ export default function VideoPreview({ src, preset, onPresetChange, onCropChange
     };
 
     return (
-        <div
-            className="video-preview"
-            style={naturalSize ? { aspectRatio: `${naturalSize.width} / ${naturalSize.height}` } : undefined}
-        >
-            <video
-                ref={videoRef}
-                src={src}
-                controls
-                onLoadedMetadata={handleLoadedMetadata}
-                className="video-preview__video"
-            />
-
-            {naturalSize ? (
-                <CropOverlay
-                    naturalWidth={naturalSize.width}
-                    naturalHeight={naturalSize.height}
-                    preset={preset}
-                    onPresetChange={onPresetChange}
-                    onChange={onCropChange}
+        <div className="overflow-hidden rounded-xl bg-slate-950 shadow-inner">
+            <div
+                className="relative mx-auto w-full max-w-2xl"
+                style={naturalSize ? { aspectRatio: `${naturalSize.width} / ${naturalSize.height}` } : { minHeight: 240 }}
+            >
+                <video
+                    ref={videoRef}
+                    src={src}
+                    controls
+                    onLoadedMetadata={handleLoadedMetadata}
+                    className="absolute inset-0 h-full w-full object-fill"
                 />
-            ) : null}
+
+                {naturalSize ? (
+                    <CropOverlay
+                        naturalWidth={naturalSize.width}
+                        naturalHeight={naturalSize.height}
+                        preset={preset}
+                        onPresetChange={onPresetChange}
+                        onChange={onCropChange}
+                    />
+                ) : null}
+            </div>
         </div>
     );
 }
