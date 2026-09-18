@@ -14,8 +14,9 @@ import CropOverlay from './CropOverlay.jsx';
  * @param {(crop: object) => void} props.onCropChange
  * @param {(meta: {naturalWidth:number, naturalHeight:number, duration:number}) => void} props.onLoadedMeta
  * @param {number} props.currentTime    Текущее время воспроизведения (для синхронизации с таймлайном).
+ * @param {{x:number,y:number,w:number,h:number,rev:number}|null} props.externalCrop  См. CropOverlay.jsx.
  */
-export default function VideoPreview({ src, preset, onPresetChange, onCropChange, onLoadedMeta, currentTime }) {
+export default function VideoPreview({ src, preset, onPresetChange, onCropChange, onLoadedMeta, currentTime, externalCrop }) {
     const videoRef = useRef(null);
     const [naturalSize, setNaturalSize] = useState(null);
 
@@ -61,6 +62,7 @@ export default function VideoPreview({ src, preset, onPresetChange, onCropChange
                         preset={preset}
                         onPresetChange={onPresetChange}
                         onChange={onCropChange}
+                        externalCrop={externalCrop}
                     />
                 ) : null}
             </div>

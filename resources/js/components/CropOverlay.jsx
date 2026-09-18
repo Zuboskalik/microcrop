@@ -49,8 +49,10 @@ function computeDefaultBox(containerSize, ratio) {
  * @param {'16:9'|'9:16'|'1:1'|'free'} props.preset
  * @param {(preset: string) => void} props.onPresetChange
  * @param {(crop: {x:number,y:number,w:number,h:number}) => void} props.onChange  Crop в пикселях исходного видео.
+ * @param {{x:number,y:number,w:number,h:number,rev:number}|null} props.externalCrop  Точный crop
+ *   из текстовых полей (CropDimensionFields) — применяется поверх текущей рамки по изменению `rev`.
  */
-export default function CropOverlay({ naturalWidth, naturalHeight, preset, onPresetChange, onChange }) {
+export default function CropOverlay({ naturalWidth, naturalHeight, preset, onPresetChange, onChange, externalCrop }) {
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
     const [box, setBox] = useState(null);
@@ -84,6 +86,28 @@ export default function CropOverlay({ naturalWidth, naturalHeight, preset, onPre
 
         setBox(computeDefaultBox(containerSize, CROP_PRESETS[preset]));
     }, [preset, containerSize.width, containerSize.height]);
+
+    // Применяем точный crop, заданный текстовыми полями (Task: ручной ввод
+    // ширины/высоты/отступов) — конвертируем реальные px обратно в box
+    // координаты превью и подменяем текущую рамку.
+    useEffect(() => {
+        if (!externalCrop || containerSize.width === 0 || containerSize.height === 0) {
+            return;
+        }
+
+        const scaleX = containerSize.width / naturalWidth;
+        const scaleY = containerSize.height / naturalHeight;
+
+        setBox({
+            x: clamp(externalCrop.x * scaleX, 0, containerSize.width),
+            y: clamp(externalCrop.y * scaleY, 0, containerSize.height),
+            w: clamp(externalCrop.w * scaleX, 1, containerSize.width),
+            h: clamp(externalCrop.h * scaleY, 1, containerSize.height),
+        });
+        // Реагируем только на изменение ревизии — containerSize/natural* тут
+        // не должны триггерить повторное применение уже применённого override.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [externalCrop?.rev]);
 
     const emitCrop = useCallback((nextBox) => {
         if (!onChange || containerSize.width === 0 || containerSize.height === 0) {

@@ -2,6 +2,8 @@ import { useCallback, useMemo, useState } from 'react';
 import VideoUploader from '../components/VideoUploader.jsx';
 import VideoPreview from '../components/VideoPreview.jsx';
 import TimelineTrimmer from '../components/TimelineTrimmer.jsx';
+import CropDimensionFields from '../components/CropDimensionFields.jsx';
+import ResizeControls from '../components/ResizeControls.jsx';
 import RenderingScreen from '../components/RenderingScreen.jsx';
 import ProUpsellModal from '../components/ProUpsellModal.jsx';
 import { useFFmpeg } from '../hooks/useFFmpeg.js';
@@ -18,6 +20,8 @@ export default function EditorPage({ preset, proAccess }) {
     const [videoMeta, setVideoMeta] = useState(null); // { naturalWidth, naturalHeight, duration }
     const [cropPreset, setCropPreset] = useState(preset?.ratio ? presetRatioToKey(preset.ratio) : 'free');
     const [crop, setCrop] = useState(null);
+    const [externalCrop, setExternalCrop] = useState(null); // {..crop, rev} — точный ввод через CropDimensionFields
+    const [resize, setResize] = useState(null); // {w,h} | null — null = 100% от текущего crop
     const [trim, setTrim] = useState(null);
     const [result, setResult] = useState(null); // { url, filename }
     const [upsellOpen, setUpsellOpen] = useState(false);
@@ -30,6 +34,8 @@ export default function EditorPage({ preset, proAccess }) {
         setVideoUrl(URL.createObjectURL(selectedFile));
         setVideoMeta(null);
         setCrop(null);
+        setExternalCrop(null);
+        setResize(null);
         setTrim(null);
         setResult(null);
     }, []);
@@ -44,14 +50,37 @@ export default function EditorPage({ preset, proAccess }) {
         setVideoUrl(null);
         setVideoMeta(null);
         setCrop(null);
+        setExternalCrop(null);
+        setResize(null);
         setTrim(null);
         setResult(null);
     }, []);
 
+    // Кроп, изменённый перетаскиванием рамки (CropOverlay сам шлёт сюда
+    // реальные пиксели видео) — сбрасывает масштаб к 100% от новой области.
+    const handleCropChange = useCallback((newCrop) => {
+        setCrop(newCrop);
+        setResize(null);
+    }, []);
+
+    // Кроп, изменённый текстовыми полями (CropDimensionFields) — дополнительно
+    // "проталкивается" в CropOverlay через externalCrop, чтобы визуальная
+    // рамка тоже сдвинулась.
+    const handleManualCropChange = useCallback((newCrop) => {
+        setCrop(newCrop);
+        setResize(null);
+        setExternalCrop({ ...newCrop, rev: Date.now() });
+    }, []);
+
+    const baseWidth = crop ? Math.round(crop.w) : Math.round(videoMeta?.naturalWidth ?? 0);
+    const baseHeight = crop ? Math.round(crop.h) : Math.round(videoMeta?.naturalHeight ?? 0);
+    const resizeValue = resize ?? { w: baseWidth, h: baseHeight };
+
     const outputHeight = useMemo(() => {
+        if (resize) return resize.h;
         if (crop) return crop.h;
         return videoMeta?.naturalHeight ?? 1080;
-    }, [crop, videoMeta]);
+    }, [resize, crop, videoMeta]);
 
     const canRender = Boolean(file && videoMeta && trim);
 
@@ -60,13 +89,14 @@ export default function EditorPage({ preset, proAccess }) {
 
         const { url } = await render(file, {
             crop,
+            resize,
             trim,
             hasProAccess,
             outputHeight,
         });
 
         setResult({ url, filename: `microcrop_${Date.now()}.mp4` });
-    }, [canRender, render, file, crop, trim, outputHeight, hasProAccess]);
+    }, [canRender, render, file, crop, resize, trim, outputHeight, hasProAccess]);
 
     return (
         <div className="flex flex-col gap-6">
@@ -81,8 +111,9 @@ export default function EditorPage({ preset, proAccess }) {
                             src={videoUrl}
                             preset={cropPreset}
                             onPresetChange={setCropPreset}
-                            onCropChange={setCrop}
+                            onCropChange={handleCropChange}
                             onLoadedMeta={onLoadedMeta}
+                            externalCrop={externalCrop}
                         />
 
                         {videoMeta ? (
@@ -94,6 +125,24 @@ export default function EditorPage({ preset, proAccess }) {
                             />
                         ) : null}
                     </div>
+
+                    {videoMeta ? (
+                        <>
+                            <CropDimensionFields
+                                naturalWidth={videoMeta.naturalWidth}
+                                naturalHeight={videoMeta.naturalHeight}
+                                crop={crop}
+                                onChange={handleManualCropChange}
+                            />
+
+                            <ResizeControls
+                                baseWidth={baseWidth}
+                                baseHeight={baseHeight}
+                                value={resizeValue}
+                                onChange={setResize}
+                            />
+                        </>
+                    ) : null}
 
                     <div className="card flex flex-wrap items-center justify-between gap-4 p-5">
                         <div className="flex items-center gap-3">

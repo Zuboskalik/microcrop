@@ -14,15 +14,23 @@ export const WATERMARK_TEXT = 'microcrop';
 /**
  * @param {object} params
  * @param {{w:number,h:number,x:number,y:number}|null} params.crop  Область кадрирования в пикселях исходного видео.
+ * @param {{w:number,h:number}|null} params.resize  Итоговое разрешение после кадрирования (масштабирование).
  * @param {boolean} params.hasProAccess  true — PRO-доступ, водяной знак не накладывается.
- * @param {number} params.outputHeight  Высота итогового кадра (после crop, если он есть) — для масштабирования знака.
+ * @param {number} params.outputHeight  Высота итогового кадра (после crop/resize) — для масштабирования знака.
  * @returns {string}  Строка для `-vf` (пустая, если фильтры не нужны).
  */
-export function buildFilterChain({ crop, hasProAccess, outputHeight }) {
+export function buildFilterChain({ crop, resize, hasProAccess, outputHeight }) {
     const filters = [];
 
     if (crop) {
         filters.push(`crop=${Math.round(crop.w)}:${Math.round(crop.h)}:${Math.round(crop.x)}:${Math.round(crop.y)}`);
+    }
+
+    if (resize) {
+        // Чётные ширина/высота обязательны для libx264 (yuv420p).
+        const w = Math.max(2, Math.round(resize.w / 2) * 2);
+        const h = Math.max(2, Math.round(resize.h / 2) * 2);
+        filters.push(`scale=${w}:${h}`);
     }
 
     if (!hasProAccess) {
@@ -58,12 +66,13 @@ export function buildWatermarkFilter(outputHeight) {
  *
  * @param {object} params
  * @param {{w:number,h:number,x:number,y:number}|null} params.crop
+ * @param {{w:number,h:number}|null} params.resize
  * @param {{start:number,end:number}|null} params.trim  Секунды.
  * @param {boolean} params.hasProAccess
  * @param {number} params.outputHeight
  * @returns {string[]}
  */
-export function buildFfmpegArgs({ crop, trim, hasProAccess, outputHeight }) {
+export function buildFfmpegArgs({ crop, resize, trim, hasProAccess, outputHeight }) {
     const args = [];
 
     if (trim) {
@@ -72,7 +81,7 @@ export function buildFfmpegArgs({ crop, trim, hasProAccess, outputHeight }) {
 
     args.push('-i', INPUT_FILENAME);
 
-    const filterChain = buildFilterChain({ crop, hasProAccess, outputHeight });
+    const filterChain = buildFilterChain({ crop, resize, hasProAccess, outputHeight });
     if (filterChain) {
         args.push('-vf', filterChain);
     }
