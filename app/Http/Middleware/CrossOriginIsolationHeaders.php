@@ -8,8 +8,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Включает cross-origin isolation, необходимую браузеру для выдачи
- * SharedArrayBuffer — без него многопоточный режим FFmpeg.wasm недоступен
- * (см. ARCHITECTURE.md §1, SPECIFICATION.md §4.7).
+ * SharedArrayBuffer — задел на многопоточный режим FFmpeg.wasm (см.
+ * ARCHITECTURE.md §1, SPECIFICATION.md §4.7). Сейчас используется
+ * однопоточное ядро (@ffmpeg/core, см. TASKS.md Phase 5), которому
+ * SharedArrayBuffer не требуется.
+ *
+ * COEP: 'credentialless' (а не 'require-corp') — иначе сторонние
+ * cross-origin скрипты без заголовка Cross-Origin-Resource-Policy
+ * (например, РСЯ) браузер молча блокирует (обнаружено в Phase 7,
+ * см. TASKS.md Task 7.5/7.6). 'credentialless' сохраняет
+ * cross-origin isolation (crossOriginIsolated=true), но грузит внешние
+ * ресурсы без credentials вместо жёсткой блокировки — этого достаточно
+ * и для рекламных скриптов, и на будущее для core-mt.
  */
 class CrossOriginIsolationHeaders
 {
@@ -23,7 +33,7 @@ class CrossOriginIsolationHeaders
         $response = $next($request);
 
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
-        $response->headers->set('Cross-Origin-Embedder-Policy', 'require-corp');
+        $response->headers->set('Cross-Origin-Embedder-Policy', 'credentialless');
         $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
 
         return $response;

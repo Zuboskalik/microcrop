@@ -15,11 +15,13 @@ export default defineConfig({
         // Laravel-страница оказываются на разных origin с точки зрения
         // браузера, и COEP блокирует загрузку воркеров/чанков между ними.
         host: '127.0.0.1',
-        // COOP/COEP нужны и при разработке через `npm run dev`, иначе
-        // FFmpeg.wasm не получит SharedArrayBuffer в dev-режиме (см. §1.7 в TASKS.md).
+        // COOP/COEP — задел на многопоточный режим FFmpeg.wasm (см. §1.7 в
+        // TASKS.md). 'credentialless', а не 'require-corp' — иначе сторонние
+        // скрипты (РСЯ) без Cross-Origin-Resource-Policy браузер блокирует
+        // молча (см. Task 7.5/7.6 в TASKS.md и CrossOriginIsolationHeaders.php).
         headers: {
             'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'require-corp',
+            'Cross-Origin-Embedder-Policy': 'credentialless',
             'Cross-Origin-Resource-Policy': 'cross-origin',
         },
     },
