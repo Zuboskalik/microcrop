@@ -13,6 +13,7 @@ Route::get('/robots.txt', function () {
         "User-agent: *\n".
         "Disallow: /api/\n".
         "Disallow: /admin/\n".
+        "Clean-param: lang\n".
         'Sitemap: '.url('/sitemap.xml')."\n",
         200
     )->header('Content-Type', 'text/plain');

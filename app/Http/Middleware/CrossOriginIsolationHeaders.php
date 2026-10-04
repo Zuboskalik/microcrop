@@ -32,6 +32,12 @@ class CrossOriginIsolationHeaders
     {
         $response = $next($request);
 
+        // По умолчанию выключено: однопоточное ядро FFmpeg.wasm isolation не
+        // требует, а COOP/COEP могут ломать iframe рекламы РСЯ.
+        if (! config('app.cross_origin_isolation')) {
+            return $response;
+        }
+
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
         $response->headers->set('Cross-Origin-Embedder-Policy', 'credentialless');
         $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');

@@ -97,6 +97,10 @@ return [
 
     'supported_locales' => ['en', 'ru'],
 
+    // COOP/COEP-заголовки (cross-origin isolation) — нужны только для
+    // многопоточного FFmpeg core-mt; см. CrossOriginIsolationHeaders.
+    'cross_origin_isolation' => env('CROSS_ORIGIN_ISOLATION', false),
+
     /*
     |--------------------------------------------------------------------------
     | Encryption Key

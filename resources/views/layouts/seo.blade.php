@@ -11,6 +11,7 @@
 
     <title>{{ $meta['title'] }}</title>
     <meta name="description" content="{{ $meta['description'] }}">
+    <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- Open Graph --}}
@@ -19,7 +20,7 @@
     <meta property="og:title" content="{{ $meta['title'] }}">
     <meta property="og:description" content="{{ $meta['description'] }}">
     <meta property="og:url" content="{{ url()->current() }}">
-    @if(!empty($meta['og_image']))
+    @if(!empty($meta['og_image']) && file_exists(public_path($meta['og_image'])))
         <meta property="og:image" content="{{ asset($meta['og_image']) }}">
     @endif
     <meta property="og:locale" content="{{ $ogLocales[$locale] ?? str_replace('-', '_', $locale) }}">

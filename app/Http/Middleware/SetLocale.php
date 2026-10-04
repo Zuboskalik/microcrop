@@ -41,7 +41,9 @@ class SetLocale
      */
     private function resolveLocale(Request $request, array $supported): string
     {
-        $fallback = config('app.fallback_locale', 'en');
+        // Для клиентов без Accept-Language (в том числе поисковых роботов)
+        // берём язык по умолчанию приложения (APP_LOCALE), а не fallback_locale.
+        $fallback = config('app.locale', 'en');
 
         $fromQuery = $request->query('lang');
 
