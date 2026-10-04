@@ -60,19 +60,21 @@ export default function EditorPage({ preset, proAccess }) {
 
     // Кроп, изменённый перетаскиванием рамки (CropOverlay сам шлёт сюда
     // реальные пиксели видео) — сбрасывает масштаб к 100% от новой области.
+    // Если рамка покрывает весь кадр, храним null: тогда FFmpeg-пайплайн
+    // не применяет crop вообще и выгрузка идентична исходному видео.
     const handleCropChange = useCallback((newCrop) => {
-        setCrop(newCrop);
+        setCrop(isFullFrameCrop(newCrop, videoMeta) ? null : newCrop);
         setResize(null);
-    }, []);
+    }, [videoMeta]);
 
     // Кроп, изменённый текстовыми полями (CropDimensionFields) — дополнительно
     // "проталкивается" в CropOverlay через externalCrop, чтобы визуальная
     // рамка тоже сдвинулась.
     const handleManualCropChange = useCallback((newCrop) => {
-        setCrop(newCrop);
+        setCrop(isFullFrameCrop(newCrop, videoMeta) ? null : newCrop);
         setResize(null);
         setExternalCrop({ ...newCrop, rev: Date.now() });
-    }, []);
+    }, [videoMeta]);
 
     const baseWidth = crop ? Math.round(crop.w) : Math.round(videoMeta?.naturalWidth ?? 0);
     const baseHeight = crop ? Math.round(crop.h) : Math.round(videoMeta?.naturalHeight ?? 0);
@@ -180,7 +182,7 @@ export default function EditorPage({ preset, proAccess }) {
                             <div className="flex items-center gap-3">
                                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-                                        <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
                                 </span>
                                 <div>
@@ -191,7 +193,7 @@ export default function EditorPage({ preset, proAccess }) {
 
                             <a href={result.url} download={result.filename} className="btn-success">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-                                    <path d="M12 4v12m0 0 4-4m-4 4-4-4M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 4v12m0 0 4-4m-4 4-4-4M4 20h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                                 {t('editor.downloadMp4')}
                             </a>
@@ -207,4 +209,21 @@ export default function EditorPage({ preset, proAccess }) {
 
 function presetRatioToKey(ratio) {
     return ['16:9', '9:16', '1:1'].includes(ratio) ? ratio : 'free';
+}
+
+/**
+ * true, если область кадрирования совпадает с кадром целиком (в пределах
+ * пары пикселей на округление) — значит кадрировать фактически нечего.
+ */
+function isFullFrameCrop(crop, meta) {
+    if (!crop || !meta) {
+        return false;
+    }
+
+    return (
+        crop.x <= 1 &&
+        crop.y <= 1 &&
+        Math.abs(crop.w - meta.naturalWidth) <= 1 &&
+        Math.abs(crop.h - meta.naturalHeight) <= 1
+    );
 }

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../i18n/I18nProvider.jsx';
 
 /**
@@ -56,34 +56,45 @@ export default function TimelineTrimmer({ duration, start, end, onChange }) {
 
     const secondsFromClientX = useCallback((clientX) => {
         const rect = trackRef.current.getBoundingClientRect();
+        if (rect.width === 0) return 0;
         const ratio = clamp((clientX - rect.left) / rect.width, 0, 1);
         return ratio * duration;
     }, [duration]);
 
-    const handlePointerMove = useCallback((event) => {
-        if (!dragging) return;
-
-        const seconds = secondsFromClientX(event.clientX);
-
-        if (dragging === 'start') {
-            onChange({ start: clamp(seconds, 0, end - 0.1), end });
-        } else {
-            onChange({ start, end: clamp(seconds, start + 0.1, duration) });
+    // Слушатели pointermove/pointerup вешаются на window через эффект, когда
+    // активен перетаскиваемый хендл. Так обработчик видит актуальные start/end
+    // и не «залипает» на устаревшем замыкании с dragging === null.
+    useEffect(() => {
+        if (!dragging) {
+            return undefined;
         }
-    }, [dragging, secondsFromClientX, start, end, duration, onChange]);
 
-    const stopDragging = useCallback(() => {
-        setDragging(null);
-        window.removeEventListener('pointermove', handlePointerMove);
-        window.removeEventListener('pointerup', stopDragging);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [handlePointerMove]);
+        const handlePointerMove = (event) => {
+            const seconds = secondsFromClientX(event.clientX);
+
+            if (dragging === 'start') {
+                onChange({ start: clamp(seconds, 0, end - 0.1), end });
+            } else {
+                onChange({ start, end: clamp(seconds, start + 0.1, duration) });
+            }
+        };
+
+        const handlePointerUp = () => setDragging(null);
+
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener('pointercancel', handlePointerUp);
+
+        return () => {
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('pointercancel', handlePointerUp);
+        };
+    }, [dragging, secondsFromClientX, start, end, duration, onChange]);
 
     const startDragging = (handle) => (event) => {
         event.preventDefault();
         setDragging(handle);
-        window.addEventListener('pointermove', handlePointerMove);
-        window.addEventListener('pointerup', stopDragging);
     };
 
     const onManualStartChange = (event) => {
@@ -108,18 +119,18 @@ export default function TimelineTrimmer({ duration, start, end, onChange }) {
                 <span>{formatTime(duration).slice(0, 8)}</span>
             </div>
 
-            <div className="relative mt-3 h-2 rounded-full bg-slate-200" ref={trackRef}>
+            <div className="relative mt-3 h-2 touch-none select-none rounded-full bg-slate-200" ref={trackRef}>
                 <div
                     className="absolute top-0 h-2 rounded-full bg-gradient-to-r from-brand-500 to-cyan-500"
                     style={{ left: `${percentFor(start)}%`, width: `${percentFor(end - start)}%` }}
                 />
                 <div
-                    className="absolute top-1/2 -ml-2.5 h-5 w-5 -translate-y-1/2 cursor-ew-resize rounded-full border-2 border-brand-500 bg-white shadow-md transition-transform hover:scale-110"
+                    className="absolute top-1/2 -ml-2.5 h-5 w-5 -translate-y-1/2 cursor-ew-resize touch-none rounded-full border-2 border-brand-500 bg-white shadow-md transition-transform hover:scale-110"
                     style={{ left: `${percentFor(start)}%` }}
                     onPointerDown={startDragging('start')}
                 />
                 <div
-                    className="absolute top-1/2 -ml-2.5 h-5 w-5 -translate-y-1/2 cursor-ew-resize rounded-full border-2 border-brand-500 bg-white shadow-md transition-transform hover:scale-110"
+                    className="absolute top-1/2 -ml-2.5 h-5 w-5 -translate-y-1/2 cursor-ew-resize touch-none rounded-full border-2 border-brand-500 bg-white shadow-md transition-transform hover:scale-110"
                     style={{ left: `${percentFor(end)}%` }}
                     onPointerDown={startDragging('end')}
                 />
