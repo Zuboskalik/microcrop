@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const BENEFITS = [
     'Снятие водяного знака «microcrop» с экспортируемого видео',
@@ -32,7 +33,7 @@ export default function ProUpsellModal({ open, onClose, startCheckout }) {
         }
     };
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 animate-fade-in" role="dialog" aria-modal="true">
             <div className="card relative w-full max-w-md p-6">
                 <button
@@ -92,6 +93,7 @@ export default function ProUpsellModal({ open, onClose, startCheckout }) {
                     Оплата через Robokassa. Самозанятый (НПД), чек придёт на указанный e-mail.
                 </p>
             </div>
-        </div>
+        </div>,
+        document.body,
     );
 }
