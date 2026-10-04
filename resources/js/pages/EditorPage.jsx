@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import VideoUploader from '../components/VideoUploader.jsx';
 import VideoPreview from '../components/VideoPreview.jsx';
+import ImagePreview from '../components/ImagePreview.jsx';
 import TimelineTrimmer from '../components/TimelineTrimmer.jsx';
 import CropDimensionFields from '../components/CropDimensionFields.jsx';
 import ResizeControls from '../components/ResizeControls.jsx';
@@ -9,90 +10,126 @@ import RenderingScreen from '../components/RenderingScreen.jsx';
 // с покупкой Pro»). Оставлено закомментированным на случай будущего возвращения.
 // import ProUpsellModal from '../components/ProUpsellModal.jsx';
 import { useFFmpeg } from '../hooks/useFFmpeg.js';
+import { processImage } from '../lib/imagePipeline.js';
 import { useTranslation } from '../i18n/I18nProvider.jsx';
 
 /**
- * Собирает Uploader → Preview/CropOverlay → TimelineTrimmer → Render → Download
+ * Собирает Uploader → Preview/CropOverlay → (TimelineTrimmer) → Render → Download
  * в единый экран редактора (Task 5.24). preset приходит из data-preset
  * Blade-обёртки посадочной страницы (Task 5.25, см. ARCHITECTURE.md §2.1).
  * proAccess — результат useProAccess() из app.jsx (Task 6.13).
+ *
+ * mode ('video' | 'image') приходит из data-mode Blade-обёртки: 'image'
+ * переключает обработку с FFmpeg.wasm (crop+trim+resize) на Canvas-пайплайн
+ * (crop+resize без таймлайна) — см. resources/js/lib/imagePipeline.js.
  */
-export default function EditorPage({ preset, proAccess }) {
+export default function EditorPage({ preset, mode = 'video', proAccess }) {
     const t = useTranslation();
+    const isImage = mode === 'image';
     const [file, setFile] = useState(null);
-    const [videoUrl, setVideoUrl] = useState(null);
-    const [videoMeta, setVideoMeta] = useState(null); // { naturalWidth, naturalHeight, duration }
+    const [mediaUrl, setMediaUrl] = useState(null);
+    const [mediaMeta, setMediaMeta] = useState(null); // { naturalWidth, naturalHeight, duration? }
     const [cropPreset, setCropPreset] = useState(preset?.ratio ? presetRatioToKey(preset.ratio) : 'free');
     const [crop, setCrop] = useState(null);
     const [externalCrop, setExternalCrop] = useState(null); // {..crop, rev} — точный ввод через CropDimensionFields
     const [resize, setResize] = useState(null); // {w,h} | null — null = 100% от текущего crop
     const [trim, setTrim] = useState(null);
     const [result, setResult] = useState(null); // { url, filename }
+    const [imageProcessing, setImageProcessing] = useState(false);
+    const [imageError, setImageError] = useState(null);
     // Временно отключено вместе с покупкой PRO.
     // const [upsellOpen, setUpsellOpen] = useState(false);
 
-    const { render, loading, progress, error } = useFFmpeg();
+    const { render, loading, progress, error: videoError } = useFFmpeg();
     const { hasProAccess } = proAccess;
+
+    const processing = isImage ? imageProcessing : loading;
+    const error = isImage ? imageError : videoError;
 
     const onFileSelected = useCallback((selectedFile) => {
         setFile(selectedFile);
-        setVideoUrl(URL.createObjectURL(selectedFile));
-        setVideoMeta(null);
+        setMediaUrl(URL.createObjectURL(selectedFile));
+        setMediaMeta(null);
         setCrop(null);
         setExternalCrop(null);
         setResize(null);
         setTrim(null);
         setResult(null);
+        setImageError(null);
     }, []);
 
     const onLoadedMeta = useCallback((meta) => {
-        setVideoMeta(meta);
-        setTrim({ start: 0, end: meta.duration });
+        setMediaMeta(meta);
+        // Таймлайн нужен только для видео — у изображений длительности нет.
+        if (typeof meta.duration === 'number') {
+            setTrim({ start: 0, end: meta.duration });
+        }
     }, []);
 
     const resetFile = useCallback(() => {
         setFile(null);
-        setVideoUrl(null);
-        setVideoMeta(null);
+        setMediaUrl(null);
+        setMediaMeta(null);
         setCrop(null);
         setExternalCrop(null);
         setResize(null);
         setTrim(null);
         setResult(null);
+        setImageError(null);
     }, []);
 
     // Кроп, изменённый перетаскиванием рамки (CropOverlay сам шлёт сюда
-    // реальные пиксели видео) — сбрасывает масштаб к 100% от новой области.
-    // Если рамка покрывает весь кадр, храним null: тогда FFmpeg-пайплайн
-    // не применяет crop вообще и выгрузка идентична исходному видео.
+    // реальные пиксели исходника) — сбрасывает масштаб к 100% от новой области.
+    // Если рамка покрывает весь кадр, храним null: тогда пайплайн не применяет
+    // crop вообще и выгрузка идентична исходному файлу.
     const handleCropChange = useCallback((newCrop) => {
-        setCrop(isFullFrameCrop(newCrop, videoMeta) ? null : newCrop);
+        setCrop(isFullFrameCrop(newCrop, mediaMeta) ? null : newCrop);
         setResize(null);
-    }, [videoMeta]);
+    }, [mediaMeta]);
 
     // Кроп, изменённый текстовыми полями (CropDimensionFields) — дополнительно
     // "проталкивается" в CropOverlay через externalCrop, чтобы визуальная
     // рамка тоже сдвинулась.
     const handleManualCropChange = useCallback((newCrop) => {
-        setCrop(isFullFrameCrop(newCrop, videoMeta) ? null : newCrop);
+        setCrop(isFullFrameCrop(newCrop, mediaMeta) ? null : newCrop);
         setResize(null);
         setExternalCrop({ ...newCrop, rev: Date.now() });
-    }, [videoMeta]);
+    }, [mediaMeta]);
 
-    const baseWidth = crop ? Math.round(crop.w) : Math.round(videoMeta?.naturalWidth ?? 0);
-    const baseHeight = crop ? Math.round(crop.h) : Math.round(videoMeta?.naturalHeight ?? 0);
+    const baseWidth = crop ? Math.round(crop.w) : Math.round(mediaMeta?.naturalWidth ?? 0);
+    const baseHeight = crop ? Math.round(crop.h) : Math.round(mediaMeta?.naturalHeight ?? 0);
     const resizeValue = resize ?? { w: baseWidth, h: baseHeight };
 
     const outputHeight = useMemo(() => {
         if (resize) return resize.h;
         if (crop) return crop.h;
-        return videoMeta?.naturalHeight ?? 1080;
-    }, [resize, crop, videoMeta]);
+        return mediaMeta?.naturalHeight ?? 1080;
+    }, [resize, crop, mediaMeta]);
 
-    const canRender = Boolean(file && videoMeta && trim);
+    // Для видео рендер возможен только когда известна длительность (таймлайн),
+    // для изображения достаточно натуральных размеров.
+    const canRender = isImage
+        ? Boolean(file && mediaMeta)
+        : Boolean(file && mediaMeta && trim);
 
     const handleRender = useCallback(async () => {
         if (!canRender) return;
+
+        if (isImage) {
+            setImageError(null);
+            setImageProcessing(true);
+
+            try {
+                const { url, extension } = await processImage(file, { crop, resize });
+                setResult({ url, filename: `microcrop_${Date.now()}.${extension}` });
+            } catch (err) {
+                setImageError(err);
+            } finally {
+                setImageProcessing(false);
+            }
+
+            return;
+        }
 
         const { url } = await render(file, {
             crop,
@@ -103,41 +140,52 @@ export default function EditorPage({ preset, proAccess }) {
         });
 
         setResult({ url, filename: `microcrop_${Date.now()}.mp4` });
-    }, [canRender, render, file, crop, resize, trim, outputHeight, hasProAccess]);
+    }, [canRender, isImage, render, file, crop, resize, trim, outputHeight, hasProAccess]);
 
     return (
         <div className="flex flex-col gap-6">
             {!file ? (
-                <VideoUploader onFileSelected={onFileSelected} />
-            ) : loading ? (
-                <RenderingScreen progress={progress} hasProAccess={hasProAccess} />
+                <VideoUploader onFileSelected={onFileSelected} mode={mode} />
+            ) : processing ? (
+                <RenderingScreen progress={isImage ? 1 : progress} hasProAccess={hasProAccess} mode={mode} />
             ) : (
                 <>
                     <div className="card overflow-hidden p-4">
-                        <VideoPreview
-                            src={videoUrl}
-                            preset={cropPreset}
-                            onPresetChange={setCropPreset}
-                            onCropChange={handleCropChange}
-                            onLoadedMeta={onLoadedMeta}
-                            externalCrop={externalCrop}
-                        />
+                        {isImage ? (
+                            <ImagePreview
+                                src={mediaUrl}
+                                preset={cropPreset}
+                                onPresetChange={setCropPreset}
+                                onCropChange={handleCropChange}
+                                onLoadedMeta={onLoadedMeta}
+                                externalCrop={externalCrop}
+                            />
+                        ) : (
+                            <VideoPreview
+                                src={mediaUrl}
+                                preset={cropPreset}
+                                onPresetChange={setCropPreset}
+                                onCropChange={handleCropChange}
+                                onLoadedMeta={onLoadedMeta}
+                                externalCrop={externalCrop}
+                            />
+                        )}
 
-                        {videoMeta ? (
+                        {!isImage && mediaMeta ? (
                             <TimelineTrimmer
-                                duration={videoMeta.duration}
+                                duration={mediaMeta.duration}
                                 start={trim?.start ?? 0}
-                                end={trim?.end ?? videoMeta.duration}
+                                end={trim?.end ?? mediaMeta.duration}
                                 onChange={setTrim}
                             />
                         ) : null}
                     </div>
 
-                    {videoMeta ? (
+                    {mediaMeta ? (
                         <>
                             <CropDimensionFields
-                                naturalWidth={videoMeta.naturalWidth}
-                                naturalHeight={videoMeta.naturalHeight}
+                                naturalWidth={mediaMeta.naturalWidth}
+                                naturalHeight={mediaMeta.naturalHeight}
                                 crop={crop}
                                 onChange={handleManualCropChange}
                             />
@@ -161,7 +209,7 @@ export default function EditorPage({ preset, proAccess }) {
                             </button>
 
                             <button type="button" className="btn-secondary" onClick={resetFile}>
-                                {t('editor.chooseAnother')}
+                                {t(isImage ? 'editor.chooseAnotherImage' : 'editor.chooseAnother')}
                             </button>
                         </div>
 
@@ -180,7 +228,7 @@ export default function EditorPage({ preset, proAccess }) {
 
                     {error ? (
                         <p role="alert" className="card border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                            {t('editor.renderError', { error: error.message ?? String(error) })}
+                            {t(isImage ? 'editor.renderErrorImage' : 'editor.renderError', { error: error.message ?? String(error) })}
                         </p>
                     ) : null}
 
@@ -194,7 +242,7 @@ export default function EditorPage({ preset, proAccess }) {
                                 </span>
                                 <div>
                                     <p className="font-semibold text-slate-900">{t('editor.done')}</p>
-                                    <p className="text-sm text-slate-500">{t('editor.processedLocally')}</p>
+                                    <p className="text-sm text-slate-500">{t(isImage ? 'editor.processedLocallyImage' : 'editor.processedLocally')}</p>
                                 </div>
                             </div>
 
@@ -202,7 +250,7 @@ export default function EditorPage({ preset, proAccess }) {
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-4 w-4">
                                     <path d="M12 4v12m0 0 4-4m-4 4-4-4M4 20h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                {t('editor.downloadMp4')}
+                                {t(isImage ? 'editor.downloadImage' : 'editor.downloadMp4')}
                             </a>
                         </div>
                     ) : null}

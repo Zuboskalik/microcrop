@@ -6,9 +6,10 @@ import { useTranslation } from '../i18n/I18nProvider.jsx';
  * и рекламный слот (Task 5.21/6.7). Ad-слот не показывается PRO-пользователям
  * (Task 6.14) — реклама рядом с оплаченным опытом только мешала бы.
  */
-export default function RenderingScreen({ progress, hasProAccess }) {
+export default function RenderingScreen({ progress, hasProAccess, mode = 'video' }) {
     const t = useTranslation();
     const percent = Math.round(progress * 100);
+    const title = mode === 'image' ? t('rendering.titleImage') : t('rendering.title');
 
     return (
         <div className="card flex flex-col items-center gap-5 p-8 text-center animate-fade-in">
@@ -27,7 +28,7 @@ export default function RenderingScreen({ progress, hasProAccess }) {
             </div>
 
             <div>
-                <p className="font-semibold text-slate-900">{t('rendering.title')}</p>
+                <p className="font-semibold text-slate-900">{title}</p>
                 <p className="mt-1 text-sm text-slate-500">
                     {t('rendering.localNote')}
                 </p>

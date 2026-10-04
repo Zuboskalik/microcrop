@@ -8,7 +8,12 @@
 
 return [
     'language' => 'Language',
-    'footer' => '© :year MicroCrop — video processing happens in your browser.',
+    'modeSwitcher' => [
+        'ariaLabel' => 'Processing type',
+        'video' => 'Video',
+        'image' => 'Image',
+    ],
+    'footer' => '© :year MicroCrop — video and image processing happens in your browser.',
     'faq' => [
         'ariaLabel' => 'Frequently asked questions',
         'heading' => 'Frequently asked questions',

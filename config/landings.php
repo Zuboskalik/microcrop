@@ -28,6 +28,18 @@ return [
         'changefreq' => 'daily',
     ],
 
+    'image' => [
+        'slug' => 'image',
+        // Режим редактора: 'image' переключает React-приложение на обработку
+        // растровых изображений (png/jpg/jpeg/webp) — кадрирование и ресайз
+        // через Canvas вместо FFmpeg.wasm (см. resources/js/lib/imagePipeline.js).
+        'mode' => 'image',
+        'preset' => null,
+        'og_image' => '/images/og/image.jpg',
+        'priority' => '0.9',
+        'changefreq' => 'weekly',
+    ],
+
     'crop-video-online' => [
         'slug' => 'crop-video-online',
         'preset' => null,

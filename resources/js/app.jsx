@@ -32,7 +32,7 @@ function loadYandexRtbScript() {
  * в разных местах страницы (шапка, рекламные слоты) — через порталы,
  * чтобы у всех была общая, а не своя копия состояния.
  */
-function App({ preset }) {
+function App({ preset, mode }) {
     const proAccess = useProAccess();
 
     useEffect(() => {
@@ -55,7 +55,7 @@ function App({ preset }) {
                 ? renderPortal('microcrop-ad-sidebar', <YandexAdBlock placement="sidebar" className="ad-slot h-full w-full" />)
                 : null}
 
-            <EditorPage preset={preset} proAccess={proAccess} />
+            <EditorPage preset={preset} mode={mode} proAccess={proAccess} />
         </>
     );
 }
@@ -82,9 +82,14 @@ if (mountEl) {
     // нет — I18nProvider сам определит язык браузера.
     const initialLocale = mountEl.dataset.locale || null;
 
+    // data-mode проставляет Blade (см. layouts/seo.blade.php из $meta['mode']):
+    // 'image' переключает редактор на обработку изображений (Canvas), иначе —
+    // режим видео (FFmpeg.wasm) по умолчанию.
+    const mode = mountEl.dataset.mode === 'image' ? 'image' : 'video';
+
     createRoot(mountEl).render(
         <I18nProvider initialLocale={initialLocale}>
-            <App preset={preset} />
+            <App preset={preset} mode={mode} />
         </I18nProvider>,
     );
 }

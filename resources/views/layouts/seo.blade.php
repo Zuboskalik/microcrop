@@ -56,15 +56,20 @@
 <body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
     <header class="sticky top-0 z-30 border-b border-slate-200/70 bg-white/80 backdrop-blur-md">
         <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-            <a href="{{ url('/') }}" class="flex items-center gap-2 text-lg font-extrabold tracking-tight">
-                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-cyan-500 text-white shadow-md shadow-brand-500/30">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-4.5 w-4.5">
-                        <path d="M6 3v14a2 2 0 0 0 2 2h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M18 21V7a2 2 0 0 0-2-2H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </span>
-                <span class="gradient-heading">MicroCrop</span>
-            </a>
+            <div class="flex items-center gap-3 sm:gap-4">
+                <a href="{{ url('/') }}" class="flex items-center gap-2 text-lg font-extrabold tracking-tight">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-cyan-500 text-white shadow-md shadow-brand-500/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-4.5 w-4.5">
+                            <path d="M6 3v14a2 2 0 0 0 2 2h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M18 21V7a2 2 0 0 0-2-2H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="gradient-heading">MicroCrop</span>
+                </a>
+
+                {{-- Переключатель "Видео / Изображение" — сразу справа от логотипа. --}}
+                @include('partials.mode-switcher')
+            </div>
 
             <div class="flex items-center gap-3">
                 <div id="microcrop-header-status" class="hidden sm:block"></div>
@@ -88,7 +93,7 @@
 
         <div class="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
             {{-- Точка монтирования React-редактора (Phase 5/6) --}}
-            <div id="microcrop-app" data-preset='@json($meta['preset'] ?? null)' data-locale="{{ $locale }}"></div>
+            <div id="microcrop-app" data-preset='@json($meta['preset'] ?? null)' data-mode="{{ $meta['mode'] ?? 'video' }}" data-locale="{{ $locale }}"></div>
 
             <aside id="microcrop-ad-sidebar" class="hidden min-h-[600px] lg:block"></aside>
         </div>

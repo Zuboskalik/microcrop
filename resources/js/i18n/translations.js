@@ -16,7 +16,7 @@ export const LOCALE_LABELS = {
 export const translations = {
     en: {
         // VideoUploader
-        'uploader.dropHere': 'Drag your video here',
+        'uploader.dropHere': 'Drag your video or image here',
         'uploader.orClick': 'or click to choose a file from your device',
         'uploader.chooseFile': 'Choose file',
         'uploader.formats': '{formats} · up to {size} MB',
@@ -34,7 +34,7 @@ export const translations = {
 
         // CropDimensionFields
         'cropFields.title': 'Exact crop area size',
-        'cropFields.subtitle': 'In source video pixels ({width}×{height})',
+        'cropFields.subtitle': 'In source pixels ({width}×{height})',
         'cropFields.width': 'Width',
         'cropFields.height': 'Height',
         'cropFields.offsetLeft': 'Left offset',
@@ -44,7 +44,7 @@ export const translations = {
 
         // ResizeControls
         'resize.title': 'Resize',
-        'resize.subtitle': 'Final resolution of the exported video',
+        'resize.subtitle': 'Final resolution of the exported file',
         'resize.reset': 'Reset (100%)',
         'resize.width': 'Width, px',
         'resize.height': 'Height, px',
@@ -53,6 +53,7 @@ export const translations = {
 
         // RenderingScreen
         'rendering.title': 'Processing video…',
+        'rendering.titleImage': 'Processing image…',
         'rendering.localNote': 'Everything happens in your browser — the file is never uploaded.',
 
         // Временно отключено вместе с покупкой PRO (задача «скрыть всё, что
@@ -81,13 +82,17 @@ export const translations = {
         // EditorPage
         'editor.cropAndProcess': 'Crop & process',
         'editor.chooseAnother': 'Choose another video',
+        'editor.chooseAnotherImage': 'Choose another image',
         // Временно отключено вместе с покупкой PRO (упоминания водяного знака и цены).
         // 'editor.watermarkNotice': 'Export will include the “microcrop” watermark · remove for 199 ₽',
         // 'editor.proNoWatermark': 'PRO: export without watermark',
         'editor.renderError': 'Could not process the video: {error}',
+        'editor.renderErrorImage': 'Could not process the image: {error}',
         'editor.done': 'Done!',
         'editor.processedLocally': 'The video was processed locally in your browser.',
+        'editor.processedLocallyImage': 'The image was processed locally in your browser.',
         'editor.downloadMp4': 'Download MP4',
+        'editor.downloadImage': 'Download image',
 
         // YandexAdBlock
         'ad.placeholder': 'Ad',
@@ -95,7 +100,7 @@ export const translations = {
 
     ru: {
         // VideoUploader
-        'uploader.dropHere': 'Перетащите видео сюда',
+        'uploader.dropHere': 'Перетащите видео или изображение сюда',
         'uploader.orClick': 'или нажмите, чтобы выбрать файл на устройстве',
         'uploader.chooseFile': 'Выбрать файл',
         'uploader.formats': '{formats} · до {size} МБ',
@@ -113,7 +118,7 @@ export const translations = {
 
         // CropDimensionFields
         'cropFields.title': 'Точный размер области кадрирования',
-        'cropFields.subtitle': 'В пикселях исходного видео ({width}×{height})',
+        'cropFields.subtitle': 'В пикселях исходного файла ({width}×{height})',
         'cropFields.width': 'Ширина',
         'cropFields.height': 'Высота',
         'cropFields.offsetLeft': 'Отступ слева',
@@ -123,7 +128,7 @@ export const translations = {
 
         // ResizeControls
         'resize.title': 'Масштабирование',
-        'resize.subtitle': 'Итоговое разрешение экспортируемого видео',
+        'resize.subtitle': 'Итоговое разрешение экспортируемого файла',
         'resize.reset': 'Сбросить (100%)',
         'resize.width': 'Ширина, px',
         'resize.height': 'Высота, px',
@@ -132,6 +137,7 @@ export const translations = {
 
         // RenderingScreen
         'rendering.title': 'Обрабатываем видео…',
+        'rendering.titleImage': 'Обрабатываем изображение…',
         'rendering.localNote': 'Всё происходит в вашем браузере — файл никуда не отправляется.',
 
         // Временно отключено вместе с покупкой PRO (задача «скрыть всё, что
@@ -160,13 +166,17 @@ export const translations = {
         // EditorPage
         'editor.cropAndProcess': 'Кадрировать и обработать',
         'editor.chooseAnother': 'Выбрать другое видео',
+        'editor.chooseAnotherImage': 'Выбрать другое изображение',
         // Временно отключено вместе с покупкой PRO (упоминания водяного знака и цены).
         // 'editor.watermarkNotice': 'Экспорт будет с водяным знаком «microcrop» · убрать за 199 ₽',
         // 'editor.proNoWatermark': 'PRO: экспорт без водяного знака',
         'editor.renderError': 'Не удалось обработать видео: {error}',
+        'editor.renderErrorImage': 'Не удалось обработать изображение: {error}',
         'editor.done': 'Готово!',
         'editor.processedLocally': 'Видео обработано локально в вашем браузере.',
+        'editor.processedLocallyImage': 'Изображение обработано локально в вашем браузере.',
         'editor.downloadMp4': 'Скачать MP4',
+        'editor.downloadImage': 'Скачать изображение',
 
         // YandexAdBlock
         'ad.placeholder': 'Реклама',

@@ -16,12 +16,24 @@ return [
         'title' => 'MicroCrop — Crop & Trim Videos Online for Free',
         'description' => 'Crop, trim and prepare videos for social media right in your browser — no server uploads. Fast, private, free.',
         'h1' => 'Crop and Trim Videos Online',
-        'intro' => 'MicroCrop processes your video right in the browser: the file is never uploaded and is handled locally on your device.',
+        'intro' => 'MicroCrop processes videos and images right in your browser: files are never uploaded and are handled locally on your device.',
         'faq' => [
-            ['q' => 'Do I need to upload my video to a server?', 'a' => 'No. All processing happens locally in your browser via FFmpeg.wasm — the file never leaves your device.'],
+            ['q' => 'Do I need to upload my files to a server?', 'a' => 'No. Processing happens locally in your browser — via FFmpeg.wasm for video and Canvas for images; the file never leaves your device.'],
             // Временно отключено вместе с покупкой PRO (упоминание разового платежа);
             // сохранено на случай будущего возвращения.
             // ['q' => 'Is it free?', 'a' => 'Yes, the core features are free. On the free tier a small “microcrop” watermark is applied to the video; you can remove it with a one-time payment.'],
+            ['q' => 'Is it free?', 'a' => 'Yes, the tool is completely free — no registration, no server uploads and no limit on the number of exports.'],
+        ],
+    ],
+
+    'image' => [
+        'title' => 'Crop and Trim Images Online — MicroCrop',
+        'description' => 'Crop, trim and resize images (PNG, JPG, JPEG, WEBP) right in your browser — no server uploads.',
+        'h1' => 'Crop and Trim Images',
+        'intro' => 'MicroCrop processes your images right in the browser: the file is never uploaded, and cropping and resizing are handled locally on your device.',
+        'faq' => [
+            ['q' => 'Which image formats are supported?', 'a' => 'PNG, JPG, JPEG and WEBP — as far as your browser can display them.'],
+            ['q' => 'Do I need to upload my image to a server?', 'a' => 'No, cropping and resizing happen locally in your browser via Canvas — the file never leaves your device.'],
             ['q' => 'Is it free?', 'a' => 'Yes, the tool is completely free — no registration, no server uploads and no limit on the number of exports.'],
         ],
     ],
