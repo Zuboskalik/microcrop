@@ -5,7 +5,9 @@ import TimelineTrimmer from '../components/TimelineTrimmer.jsx';
 import CropDimensionFields from '../components/CropDimensionFields.jsx';
 import ResizeControls from '../components/ResizeControls.jsx';
 import RenderingScreen from '../components/RenderingScreen.jsx';
-import ProUpsellModal from '../components/ProUpsellModal.jsx';
+// Временно отключено вместе с покупкой PRO (задача «скрыть всё, что связано
+// с покупкой Pro»). Оставлено закомментированным на случай будущего возвращения.
+// import ProUpsellModal from '../components/ProUpsellModal.jsx';
 import { useFFmpeg } from '../hooks/useFFmpeg.js';
 import { useTranslation } from '../i18n/I18nProvider.jsx';
 
@@ -26,10 +28,11 @@ export default function EditorPage({ preset, proAccess }) {
     const [resize, setResize] = useState(null); // {w,h} | null — null = 100% от текущего crop
     const [trim, setTrim] = useState(null);
     const [result, setResult] = useState(null); // { url, filename }
-    const [upsellOpen, setUpsellOpen] = useState(false);
+    // Временно отключено вместе с покупкой PRO.
+    // const [upsellOpen, setUpsellOpen] = useState(false);
 
     const { render, loading, progress, error } = useFFmpeg();
-    const { hasProAccess, startCheckout } = proAccess;
+    const { hasProAccess } = proAccess;
 
     const onFileSelected = useCallback((selectedFile) => {
         setFile(selectedFile);
@@ -162,6 +165,9 @@ export default function EditorPage({ preset, proAccess }) {
                             </button>
                         </div>
 
+                        {/* Временно отключено вместе с покупкой PRO: уведомление
+                            о водяном знаке и апселл PRO. Оставлено
+                            закомментированным на случай будущего возвращения.
                         {!hasProAccess ? (
                             <button type="button" onClick={() => setUpsellOpen(true)} className="text-sm font-medium text-slate-500 underline-offset-2 hover:text-brand-600 hover:underline">
                                 {t('editor.watermarkNotice')}
@@ -169,6 +175,7 @@ export default function EditorPage({ preset, proAccess }) {
                         ) : (
                             <span className="text-sm font-medium text-emerald-600">{t('editor.proNoWatermark')}</span>
                         )}
+                        */}
                     </div>
 
                     {error ? (
@@ -202,7 +209,9 @@ export default function EditorPage({ preset, proAccess }) {
                 </>
             )}
 
+            {/* Временно отключено вместе с покупкой PRO.
             <ProUpsellModal open={upsellOpen} onClose={() => setUpsellOpen(false)} startCheckout={startCheckout} />
+            */}
         </div>
     );
 }

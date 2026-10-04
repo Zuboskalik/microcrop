@@ -92,9 +92,12 @@ export function useFFmpeg() {
 
             await ffmpeg.writeFile(INPUT_FILENAME, await fetchFile(file));
 
-            if (!options.hasProAccess) {
-                await ensureWatermarkFont(ffmpeg);
-            }
+            // Временно отключено вместе с покупкой PRO: водяной знак больше
+            // не накладывается, поэтому шрифт для drawtext не загружаем.
+            // Оставлено закомментированным на случай будущего возвращения.
+            // if (!options.hasProAccess) {
+            //     await ensureWatermarkFont(ffmpeg);
+            // }
 
             const args = buildFfmpegArgs(options);
             await ffmpeg.exec(args);

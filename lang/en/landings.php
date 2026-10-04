@@ -19,7 +19,10 @@ return [
         'intro' => 'MicroCrop processes your video right in the browser: the file is never uploaded and is handled locally on your device.',
         'faq' => [
             ['q' => 'Do I need to upload my video to a server?', 'a' => 'No. All processing happens locally in your browser via FFmpeg.wasm — the file never leaves your device.'],
-            ['q' => 'Is it free?', 'a' => 'Yes, the core features are free. On the free tier a small “microcrop” watermark is applied to the video; you can remove it with a one-time payment.'],
+            // Временно отключено вместе с покупкой PRO (упоминание разового платежа);
+            // сохранено на случай будущего возвращения.
+            // ['q' => 'Is it free?', 'a' => 'Yes, the core features are free. On the free tier a small “microcrop” watermark is applied to the video; you can remove it with a one-time payment.'],
+            ['q' => 'Is it free?', 'a' => 'Yes, the tool is completely free — no registration, no server uploads and no limit on the number of exports.'],
         ],
     ],
 
@@ -30,7 +33,10 @@ return [
         'intro' => 'Upload a video file, choose the crop area or the time range you need — then download the result. No installation and no sign-up.',
         'faq' => [
             ['q' => 'Which video formats are supported?', 'a' => 'MP4, MOV, WebM, AVI — as far as your browser can decode them.'],
-            ['q' => 'Will the watermark stay on the video?', 'a' => 'On the free tier — yes, a small semi-transparent “microcrop” label in the corner. It can be removed with a one-time payment.'],
+            // Временно отключено вместе с покупкой PRO (упоминание водяного знака и разового платежа);
+            // сохранено на случай будущего возвращения.
+            // ['q' => 'Will the watermark stay on the video?', 'a' => 'On the free tier — yes, a small semi-transparent “microcrop” label in the corner. It can be removed with a one-time payment.'],
+            ['q' => 'Does the video keep its quality?', 'a' => 'Yes, processing is done with settings that preserve the original frame quality.'],
         ],
     ],
 
@@ -64,14 +70,19 @@ return [
 
     'crop-for-tiktok' => [
         'title' => 'Crop Video for TikTok Online — 9:16',
-        'description' => 'Crop and trim video into the TikTok format (9:16) right in your browser, without a watermark — with PRO access.',
+        // Временно отключено вместе с покупкой PRO (упоминание PRO-доступа и вотермарки);
+        // сохранено на случай будущего возвращения.
+        // 'description' => 'Crop and trim video into the TikTok format (9:16) right in your browser, without a watermark — with PRO access.',
+        'description' => 'Crop and trim video into the TikTok format (9:16) right in your browser — fast and free.',
         'h1' => 'Make Video for TikTok',
         'intro' => 'The 9:16 format is already selected by default — upload a video and adjust the frame for TikTok.',
         'preset' => [
             'label' => 'TikTok',
         ],
         'faq' => [
-            ['q' => 'Can I remove the watermark?', 'a' => 'Yes, with a one-time payment via Robokassa — after payment the “microcrop” label is not applied to the exported video.'],
+            // Временно отключено вместе с покупкой PRO (упоминание разового платежа);
+            // сохранено на случай будущего возвращения.
+            // ['q' => 'Can I remove the watermark?', 'a' => 'Yes, with a one-time payment via Robokassa — after payment the “microcrop” label is not applied to the exported video.'],
             ['q' => 'Does the video keep its quality?', 'a' => 'Yes, encoding is done with settings that preserve the original frame quality.'],
         ],
     ],

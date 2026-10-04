@@ -43,7 +43,11 @@ function App({ preset }) {
 
     return (
         <>
+            {/* Временно отключено вместе с покупкой PRO: индикатор статуса и
+                кнопка «Купить PRO» в шапке. Оставлено закомментированным на
+                случай будущего возвращения.
             {renderPortal('microcrop-header-status', <HeaderStatus proAccess={proAccess} />)}
+            */}
             {!proAccess.hasProAccess
                 ? renderPortal('microcrop-ad-header', <YandexAdBlock placement="header" className="ad-slot h-full w-full" />)
                 : null}

@@ -33,9 +33,12 @@ export function buildFilterChain({ crop, resize, hasProAccess, outputHeight }) {
         filters.push(`scale=${w}:${h}`);
     }
 
-    if (!hasProAccess) {
-        filters.push(buildWatermarkFilter(outputHeight));
-    }
+    // Временно отключено вместе с покупкой PRO: водяной знак в углу видео
+    // больше не накладывается. Оставлено закомментированным на случай
+    // будущего возвращения.
+    // if (!hasProAccess) {
+    //     filters.push(buildWatermarkFilter(outputHeight));
+    // }
 
     return filters.join(',');
 }
@@ -43,6 +46,9 @@ export function buildFilterChain({ crop, resize, hasProAccess, outputHeight }) {
 /**
  * Полупрозрачный текст "microcrop" в правом нижнем углу, отступ и размер
  * шрифта масштабируются относительно высоты кадра (см. ARCHITECTURE.md §4.4).
+ *
+ * Временно не используется (водяной знак отключён вместе с покупкой PRO),
+ * но сохранён на случай будущего возвращения.
  *
  * @param {number} outputHeight
  * @returns {string}
