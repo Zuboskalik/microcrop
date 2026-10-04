@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { useTranslation } from '../i18n/I18nProvider.jsx';
 
 function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
@@ -50,6 +51,7 @@ function NumberField({ label, value, onCommit, min = 0, max }) {
  * @param {(crop: {x:number,y:number,w:number,h:number}) => void} props.onChange
  */
 export default function CropDimensionFields({ naturalWidth, naturalHeight, crop, onChange }) {
+    const t = useTranslation();
     const current = crop ?? { x: 0, y: 0, w: naturalWidth, h: naturalHeight };
     const left = current.x;
     const top = current.y;
@@ -77,16 +79,16 @@ export default function CropDimensionFields({ naturalWidth, naturalHeight, crop,
 
     return (
         <div className="card mt-4 p-5">
-            <p className="text-sm font-semibold text-slate-700">Точный размер области кадрирования</p>
-            <p className="mt-0.5 text-xs text-slate-400">В пикселях исходного видео ({naturalWidth}×{naturalHeight})</p>
+            <p className="text-sm font-semibold text-slate-700">{t('cropFields.title')}</p>
+            <p className="mt-0.5 text-xs text-slate-400">{t('cropFields.subtitle', { width: naturalWidth, height: naturalHeight })}</p>
 
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <NumberField label="Ширина" value={current.w} min={1} max={naturalWidth - current.x} onCommit={setWidth} />
-                <NumberField label="Высота" value={current.h} min={1} max={naturalHeight - current.y} onCommit={setHeight} />
-                <NumberField label="Отступ слева" value={left} min={0} max={naturalWidth - 1} onCommit={setLeft} />
-                <NumberField label="Отступ справа" value={right} min={0} max={naturalWidth - 1} onCommit={setRight} />
-                <NumberField label="Отступ сверху" value={top} min={0} max={naturalHeight - 1} onCommit={setTop} />
-                <NumberField label="Отступ снизу" value={bottom} min={0} max={naturalHeight - 1} onCommit={setBottom} />
+                <NumberField label={t('cropFields.width')} value={current.w} min={1} max={naturalWidth - current.x} onCommit={setWidth} />
+                <NumberField label={t('cropFields.height')} value={current.h} min={1} max={naturalHeight - current.y} onCommit={setHeight} />
+                <NumberField label={t('cropFields.offsetLeft')} value={left} min={0} max={naturalWidth - 1} onCommit={setLeft} />
+                <NumberField label={t('cropFields.offsetRight')} value={right} min={0} max={naturalWidth - 1} onCommit={setRight} />
+                <NumberField label={t('cropFields.offsetTop')} value={top} min={0} max={naturalHeight - 1} onCommit={setTop} />
+                <NumberField label={t('cropFields.offsetBottom')} value={bottom} min={0} max={naturalHeight - 1} onCommit={setBottom} />
             </div>
         </div>
     );

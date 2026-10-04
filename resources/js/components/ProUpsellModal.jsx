@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-
-const BENEFITS = [
-    'Снятие водяного знака «microcrop» с экспортируемого видео',
-    'Без рекламных блоков во время обработки',
-    'Ускоренные настройки кодирования',
-];
+import { useTranslation } from '../i18n/I18nProvider.jsx';
 
 /**
  * Модальное окно покупки PRO-доступа (Task 6.8/6.9). Вызывает
@@ -13,12 +8,19 @@ const BENEFITS = [
  * полученный payment_url Robokassa.
  */
 export default function ProUpsellModal({ open, onClose, startCheckout }) {
+    const t = useTranslation();
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
     if (!open) {
         return null;
     }
+
+    const benefits = [
+        t('upsell.benefitWatermark'),
+        t('upsell.benefitNoAds'),
+        t('upsell.benefitEncoding'),
+    ];
 
     const handleBuy = async () => {
         setSubmitting(true);
@@ -28,7 +30,7 @@ export default function ProUpsellModal({ open, onClose, startCheckout }) {
             const paymentUrl = await startCheckout('remove_watermark');
             window.location.href = paymentUrl;
         } catch {
-            setError('Не удалось создать заказ. Попробуйте ещё раз.');
+            setError(t('upsell.errorCreateOrder'));
             setSubmitting(false);
         }
     };
@@ -40,7 +42,7 @@ export default function ProUpsellModal({ open, onClose, startCheckout }) {
                     type="button"
                     onClick={onClose}
                     className="absolute right-4 top-4 rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                    aria-label="Закрыть"
+                    aria-label={t('upsell.close')}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-5 w-5">
                         <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -55,12 +57,12 @@ export default function ProUpsellModal({ open, onClose, startCheckout }) {
                     </span>
                     <div>
                         <h2 className="text-lg font-bold text-slate-900">MicroCrop PRO</h2>
-                        <p className="text-sm text-slate-500">Разовый платёж, без подписки</p>
+                        <p className="text-sm text-slate-500">{t('upsell.oneTime')}</p>
                     </div>
                 </div>
 
                 <ul className="mt-5 space-y-3">
-                    {BENEFITS.map((benefit) => (
+                    {benefits.map((benefit) => (
                         <li key={benefit} className="flex items-start gap-2 text-sm text-slate-600">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500">
                                 <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15"/>
@@ -72,8 +74,8 @@ export default function ProUpsellModal({ open, onClose, startCheckout }) {
                 </ul>
 
                 <div className="mt-6 flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-slate-900">199&nbsp;₽</span>
-                    <span className="text-sm text-slate-400">разово</span>
+                    <span className="text-3xl font-extrabold text-slate-900">{t('upsell.priceAmount')}</span>
+                    <span className="text-sm text-slate-400">{t('upsell.priceSuffix')}</span>
                 </div>
 
                 {error ? <p className="mt-3 text-sm text-red-600" role="alert">{error}</p> : null}
@@ -82,15 +84,15 @@ export default function ProUpsellModal({ open, onClose, startCheckout }) {
                     {submitting ? (
                         <>
                             <span className="spinner border-slate-900/30 border-t-slate-900" />
-                            Переходим к оплате…
+                            {t('upsell.redirecting')}
                         </>
                     ) : (
-                        'Купить PRO / снять водяной знак'
+                        t('upsell.buy')
                     )}
                 </button>
 
                 <p className="mt-3 text-center text-xs text-slate-400">
-                    Оплата через Robokassa. Самозанятый (НПД), чек придёт на указанный e-mail.
+                    {t('upsell.footerNote')}
                 </p>
             </div>
         </div>,

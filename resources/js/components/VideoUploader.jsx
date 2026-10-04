@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { useTranslation } from '../i18n/I18nProvider.jsx';
 
 const ACCEPTED_EXTENSIONS = ['mp4', 'mov', 'webm', 'avi'];
 const ACCEPTED_MIME_TYPES = ['video/mp4', 'video/quicktime', 'video/webm', 'video/x-msvideo', 'video/avi'];
@@ -12,16 +13,20 @@ function formatMegabytes(bytes) {
     return Math.round(bytes / (1024 * 1024));
 }
 
-function validateFile(file, maxSizeBytes) {
+function validateFile(file, maxSizeBytes, t) {
     const extension = getExtension(file.name);
     const looksLikeVideo = ACCEPTED_EXTENSIONS.includes(extension) || ACCEPTED_MIME_TYPES.includes(file.type);
+    const formats = ACCEPTED_EXTENSIONS.join(', ').toUpperCase();
 
     if (!looksLikeVideo) {
-        return `Неподдерживаемый формат «.${extension || '?'}». Поддерживаются: ${ACCEPTED_EXTENSIONS.join(', ').toUpperCase()}.`;
+        return t('uploader.errorUnsupported', { ext: extension || '?', formats });
     }
 
     if (file.size > maxSizeBytes) {
-        return `Файл слишком большой (${formatMegabytes(file.size)} МБ). Максимум — ${formatMegabytes(maxSizeBytes)} МБ.`;
+        return t('uploader.errorTooLarge', {
+            size: formatMegabytes(file.size),
+            max: formatMegabytes(maxSizeBytes),
+        });
     }
 
     return null;
@@ -32,6 +37,7 @@ function validateFile(file, maxSizeBytes) {
  * См. TASKS.md Task 5.3/5.4.
  */
 export default function VideoUploader({ onFileSelected, maxSizeBytes = DEFAULT_MAX_SIZE_BYTES }) {
+    const t = useTranslation();
     const inputRef = useRef(null);
     const [isDragActive, setIsDragActive] = useState(false);
     const [error, setError] = useState(null);
@@ -41,7 +47,7 @@ export default function VideoUploader({ onFileSelected, maxSizeBytes = DEFAULT_M
             return;
         }
 
-        const validationError = validateFile(file, maxSizeBytes);
+        const validationError = validateFile(file, maxSizeBytes, t);
 
         if (validationError) {
             setError(validationError);
@@ -50,7 +56,7 @@ export default function VideoUploader({ onFileSelected, maxSizeBytes = DEFAULT_M
 
         setError(null);
         onFileSelected(file);
-    }, [maxSizeBytes, onFileSelected]);
+    }, [maxSizeBytes, onFileSelected, t]);
 
     const onDrop = useCallback((event) => {
         event.preventDefault();
@@ -99,16 +105,19 @@ export default function VideoUploader({ onFileSelected, maxSizeBytes = DEFAULT_M
                 </span>
 
                 <div>
-                    <p className="font-semibold text-slate-900">Перетащите видео сюда</p>
-                    <p className="text-sm text-slate-500">или нажмите, чтобы выбрать файл на устройстве</p>
+                    <p className="font-semibold text-slate-900">{t('uploader.dropHere')}</p>
+                    <p className="text-sm text-slate-500">{t('uploader.orClick')}</p>
                 </div>
 
                 <span className="btn-secondary pointer-events-none">
-                    Выбрать файл
+                    {t('uploader.chooseFile')}
                 </span>
 
                 <p className="text-xs text-slate-400">
-                    {ACCEPTED_EXTENSIONS.join(', ').toUpperCase()} · до {formatMegabytes(maxSizeBytes)} МБ
+                    {t('uploader.formats', {
+                        formats: ACCEPTED_EXTENSIONS.join(', ').toUpperCase(),
+                        size: formatMegabytes(maxSizeBytes),
+                    })}
                 </p>
 
                 <input

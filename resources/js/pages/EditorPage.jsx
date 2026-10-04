@@ -7,6 +7,7 @@ import ResizeControls from '../components/ResizeControls.jsx';
 import RenderingScreen from '../components/RenderingScreen.jsx';
 import ProUpsellModal from '../components/ProUpsellModal.jsx';
 import { useFFmpeg } from '../hooks/useFFmpeg.js';
+import { useTranslation } from '../i18n/I18nProvider.jsx';
 
 /**
  * Собирает Uploader → Preview/CropOverlay → TimelineTrimmer → Render → Download
@@ -15,6 +16,7 @@ import { useFFmpeg } from '../hooks/useFFmpeg.js';
  * proAccess — результат useProAccess() из app.jsx (Task 6.13).
  */
 export default function EditorPage({ preset, proAccess }) {
+    const t = useTranslation();
     const [file, setFile] = useState(null);
     const [videoUrl, setVideoUrl] = useState(null);
     const [videoMeta, setVideoMeta] = useState(null); // { naturalWidth, naturalHeight, duration }
@@ -150,26 +152,26 @@ export default function EditorPage({ preset, proAccess }) {
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-4 w-4">
                                     <path d="M6 4l14 8-14 8V4Z" fill="currentColor"/>
                                 </svg>
-                                Кадрировать и обработать
+                                {t('editor.cropAndProcess')}
                             </button>
 
                             <button type="button" className="btn-secondary" onClick={resetFile}>
-                                Выбрать другое видео
+                                {t('editor.chooseAnother')}
                             </button>
                         </div>
 
                         {!hasProAccess ? (
                             <button type="button" onClick={() => setUpsellOpen(true)} className="text-sm font-medium text-slate-500 underline-offset-2 hover:text-brand-600 hover:underline">
-                                Экспорт будет с водяным знаком «microcrop» · убрать за 199&nbsp;₽
+                                {t('editor.watermarkNotice')}
                             </button>
                         ) : (
-                            <span className="text-sm font-medium text-emerald-600">PRO: экспорт без водяного знака</span>
+                            <span className="text-sm font-medium text-emerald-600">{t('editor.proNoWatermark')}</span>
                         )}
                     </div>
 
                     {error ? (
                         <p role="alert" className="card border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                            Не удалось обработать видео: {error.message ?? String(error)}
+                            {t('editor.renderError', { error: error.message ?? String(error) })}
                         </p>
                     ) : null}
 
@@ -182,8 +184,8 @@ export default function EditorPage({ preset, proAccess }) {
                                     </svg>
                                 </span>
                                 <div>
-                                    <p className="font-semibold text-slate-900">Готово!</p>
-                                    <p className="text-sm text-slate-500">Видео обработано локально в вашем браузере.</p>
+                                    <p className="font-semibold text-slate-900">{t('editor.done')}</p>
+                                    <p className="text-sm text-slate-500">{t('editor.processedLocally')}</p>
                                 </div>
                             </div>
 
@@ -191,7 +193,7 @@ export default function EditorPage({ preset, proAccess }) {
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-4 w-4">
                                     <path d="M12 4v12m0 0 4-4m-4 4-4-4M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                Скачать MP4
+                                {t('editor.downloadMp4')}
                             </a>
                         </div>
                     ) : null}

@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { useTranslation } from '../i18n/I18nProvider.jsx';
 
 /**
  * чч:мм:сс.мс — см. TASKS.md Task 5.9.
@@ -47,6 +48,7 @@ function clamp(value, min, max) {
  * (Task 5.9/5.10). duration — длительность исходного видео в секундах.
  */
 export default function TimelineTrimmer({ duration, start, end, onChange }) {
+    const t = useTranslation();
     const trackRef = useRef(null);
     const [dragging, setDragging] = useState(null);
 
@@ -102,7 +104,7 @@ export default function TimelineTrimmer({ duration, start, end, onChange }) {
         <div className="card mt-4 p-5">
             <div className="flex items-center justify-between text-xs font-medium text-slate-400">
                 <span>0:00</span>
-                <span>Таймлайн</span>
+                <span>{t('timeline.title')}</span>
                 <span>{formatTime(duration).slice(0, 8)}</span>
             </div>
 
@@ -125,7 +127,7 @@ export default function TimelineTrimmer({ duration, start, end, onChange }) {
 
             <div className="mt-4 flex items-center gap-4 text-sm">
                 <label className="flex-1">
-                    <span className="mb-1 block text-xs font-medium text-slate-400">Начало</span>
+                    <span className="mb-1 block text-xs font-medium text-slate-400">{t('timeline.start')}</span>
                     <input
                         type="text"
                         defaultValue={formatTime(start)}
@@ -135,7 +137,7 @@ export default function TimelineTrimmer({ duration, start, end, onChange }) {
                     />
                 </label>
                 <label className="flex-1">
-                    <span className="mb-1 block text-xs font-medium text-slate-400">Конец</span>
+                    <span className="mb-1 block text-xs font-medium text-slate-400">{t('timeline.end')}</span>
                     <input
                         type="text"
                         defaultValue={formatTime(end)}

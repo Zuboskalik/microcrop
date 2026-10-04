@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from '../i18n/I18nProvider.jsx';
 
 export const CROP_PRESETS = {
     '16:9': 16 / 9,
@@ -53,6 +54,7 @@ function computeDefaultBox(containerSize, ratio) {
  *   из текстовых полей (CropDimensionFields) — применяется поверх текущей рамки по изменению `rev`.
  */
 export default function CropOverlay({ naturalWidth, naturalHeight, preset, onPresetChange, onChange, externalCrop }) {
+    const t = useTranslation();
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
     const [box, setBox] = useState(null);
@@ -236,7 +238,7 @@ export default function CropOverlay({ naturalWidth, naturalHeight, preset, onPre
 
     return (
         <div className="absolute inset-0 touch-none" ref={containerRef}>
-            <div className="absolute left-2 top-2 z-10 flex gap-1.5 rounded-lg bg-slate-900/70 p-1 backdrop-blur-sm" role="group" aria-label="Соотношение сторон">
+            <div className="absolute left-2 top-2 z-10 flex gap-1.5 rounded-lg bg-slate-900/70 p-1 backdrop-blur-sm" role="group" aria-label={t('cropOverlay.aspectRatio')}>
                 {Object.keys(CROP_PRESETS).map((key) => (
                     <button
                         key={key}
@@ -245,7 +247,7 @@ export default function CropOverlay({ naturalWidth, naturalHeight, preset, onPre
                             ${preset === key ? 'bg-brand-500 text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}
                         onClick={() => onPresetChange(key)}
                     >
-                        {key === 'free' ? 'Free' : key}
+                        {key === 'free' ? t('cropOverlay.presetFree') : key}
                     </button>
                 ))}
             </div>

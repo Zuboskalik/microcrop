@@ -1,4 +1,5 @@
 import YandexAdBlock from './YandexAdBlock.jsx';
+import { useTranslation } from '../i18n/I18nProvider.jsx';
 
 /**
  * Экран ожидания рендера FFmpeg.wasm — прогресс-бар с процентами, спиннер
@@ -6,6 +7,7 @@ import YandexAdBlock from './YandexAdBlock.jsx';
  * (Task 6.14) — реклама рядом с оплаченным опытом только мешала бы.
  */
 export default function RenderingScreen({ progress, hasProAccess }) {
+    const t = useTranslation();
     const percent = Math.round(progress * 100);
 
     return (
@@ -25,9 +27,9 @@ export default function RenderingScreen({ progress, hasProAccess }) {
             </div>
 
             <div>
-                <p className="font-semibold text-slate-900">Обрабатываем видео…</p>
+                <p className="font-semibold text-slate-900">{t('rendering.title')}</p>
                 <p className="mt-1 text-sm text-slate-500">
-                    Всё происходит в вашем браузере — файл никуда не отправляется.
+                    {t('rendering.localNote')}
                 </p>
             </div>
 

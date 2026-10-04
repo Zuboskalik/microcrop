@@ -1,4 +1,5 @@
 import { useId, useState } from 'react';
+import { useTranslation } from '../i18n/I18nProvider.jsx';
 
 function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
@@ -16,6 +17,7 @@ function clamp(value, min, max) {
  * @param {(next: {w:number,h:number}) => void} props.onChange
  */
 export default function ResizeControls({ baseWidth, baseHeight, value, onChange }) {
+    const t = useTranslation();
     const [keepAspect, setKeepAspect] = useState(true);
     const widthId = useId();
     const heightId = useId();
@@ -51,19 +53,19 @@ export default function ResizeControls({ baseWidth, baseHeight, value, onChange 
         <div className="card mt-4 p-5">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-sm font-semibold text-slate-700">Масштабирование</p>
-                    <p className="mt-0.5 text-xs text-slate-400">Итоговое разрешение экспортируемого видео</p>
+                    <p className="text-sm font-semibold text-slate-700">{t('resize.title')}</p>
+                    <p className="mt-0.5 text-xs text-slate-400">{t('resize.subtitle')}</p>
                 </div>
                 {(value.w !== baseWidth || value.h !== baseHeight) ? (
                     <button type="button" onClick={reset} className="text-xs font-medium text-brand-600 hover:underline">
-                        Сбросить (100%)
+                        {t('resize.reset')}
                     </button>
                 ) : null}
             </div>
 
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <label htmlFor={widthId} className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-slate-400">Ширина, px</span>
+                    <span className="text-xs font-medium text-slate-400">{t('resize.width')}</span>
                     <input
                         id={widthId}
                         type="number"
@@ -78,7 +80,7 @@ export default function ResizeControls({ baseWidth, baseHeight, value, onChange 
                 </label>
 
                 <label htmlFor={heightId} className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-slate-400">Высота, px</span>
+                    <span className="text-xs font-medium text-slate-400">{t('resize.height')}</span>
                     <input
                         id={heightId}
                         type="number"
@@ -93,7 +95,7 @@ export default function ResizeControls({ baseWidth, baseHeight, value, onChange 
                 </label>
 
                 <label htmlFor={percentId} className="flex flex-col gap-1">
-                    <span className="text-xs font-medium text-slate-400">Масштаб, %</span>
+                    <span className="text-xs font-medium text-slate-400">{t('resize.scale')}</span>
                     <input
                         id={percentId}
                         type="number"
@@ -117,7 +119,7 @@ export default function ResizeControls({ baseWidth, baseHeight, value, onChange 
                     onChange={(e) => setKeepAspect(e.target.checked)}
                     className="h-4 w-4 rounded border-slate-300 text-brand-500 focus:ring-brand-400"
                 />
-                Сохранять пропорции
+                {t('resize.keepAspect')}
             </label>
         </div>
     );

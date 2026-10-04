@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from '../i18n/I18nProvider.jsx';
 
 // Реальные ID блоков РСЯ подставляются в проде (ЛК Яндекс.Директ) —
 // см. ARCHITECTURE.md §5.1. Пустая строка = блок не сконфигурирован,
@@ -16,6 +17,7 @@ const AD_BLOCK_IDS = {
  * @param {'header'|'sidebar'|'renderScreen'} props.placement
  */
 export default function YandexAdBlock({ placement, className = '' }) {
+    const t = useTranslation();
     const containerRef = useRef(null);
     const [failed, setFailed] = useState(false);
     const blockId = AD_BLOCK_IDS[placement];
@@ -61,7 +63,7 @@ export default function YandexAdBlock({ placement, className = '' }) {
     if (failed) {
         // Пустой fallback без "дырки" в layout — реклама никогда не блокирует
         // основной функционал (crop/trim/render/download).
-        return <div className={`ad-slot ${className}`} aria-hidden="true">Реклама</div>;
+        return <div className={`ad-slot ${className}`} aria-hidden="true">{t('ad.placeholder')}</div>;
     }
 
     return <div ref={containerRef} className={className} data-ad-placement={placement} />;
