@@ -48,12 +48,15 @@ function App({ preset, mode }) {
                 случай будущего возвращения.
             {renderPortal('microcrop-header-status', <HeaderStatus proAccess={proAccess} />)}
             */}
+            {/* Рекламные слоты временно отключены (включить обратно вместе с
+                Blade-контейнерами #microcrop-ad-* в layouts/seo.blade.php).
             {!proAccess.hasProAccess
                 ? renderPortal('microcrop-ad-header', <YandexAdBlock placement="header" className="ad-slot h-full w-full" />)
                 : null}
             {!proAccess.hasProAccess
                 ? renderPortal('microcrop-ad-sidebar', <YandexAdBlock placement="sidebar" className="ad-slot h-full w-full" />)
                 : null}
+            */}
 
             <EditorPage preset={preset} mode={mode} proAccess={proAccess} />
         </>

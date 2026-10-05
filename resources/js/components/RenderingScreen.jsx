@@ -34,9 +34,11 @@ export default function RenderingScreen({ progress, hasProAccess, mode = 'video'
                 </p>
             </div>
 
+            {/* Рекламный слот временно отключён.
             {!hasProAccess ? (
                 <YandexAdBlock placement="renderScreen" className="ad-slot h-[100px] w-full" />
             ) : null}
+            */}
         </div>
     );
 }

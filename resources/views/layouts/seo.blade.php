@@ -90,12 +90,17 @@
                 <div id="microcrop-header-status" class="hidden sm:block"></div>
 
                 @if(app()->getLocale() === 'ru')
-                    <iframe src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=1KN3D2LVOSJ.261004&" width="200" height="50" frameborder="0" allowtransparency="true" scrolling="no" title="Поддержка сайта" class="max-w-full shrink-0"></iframe>
+                    <div class="flex shrink-0 flex-col items-center">
+                        <iframe src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=1KN3D2LVOSJ.261004&" width="200" height="50" frameborder="0" allowtransparency="true" scrolling="no" title="Поддержка сайта" class="max-w-full"></iframe>
+                        <span class="text-[10px] leading-none text-slate-400">поддержка сайта</span>
+                    </div>
                 @endif
 
                 @include('partials.language-switcher')
 
+                {{-- Рекламный слот временно отключён.
                 <div id="microcrop-ad-header" class="hidden h-[60px] w-[320px] shrink-0 md:block"></div>
+                --}}
             </div>
         </div>
     </header>
@@ -110,11 +115,13 @@
             @endif
         </section>
 
-        <div class="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div class="mt-10 grid gap-6">
             {{-- Точка монтирования React-редактора (Phase 5/6) --}}
             <div id="microcrop-app" data-preset='@json($meta['preset'] ?? null)' data-mode="{{ $meta['mode'] ?? 'video' }}" data-locale="{{ $locale }}"></div>
 
+            {{-- Рекламный слот временно отключён (вернуть вместе с колонкой lg:grid-cols-[minmax(0,1fr)_280px]).
             <aside id="microcrop-ad-sidebar" class="hidden min-h-[600px] lg:block"></aside>
+            --}}
         </div>
 
         {{-- Индексируемый текстовый SEO-контент страницы (FAQ и т.п.) --}}
