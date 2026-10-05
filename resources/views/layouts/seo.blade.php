@@ -70,7 +70,7 @@
 </head>
 <body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
     <header class="sticky top-0 z-30 border-b border-slate-200/70 bg-white/80 backdrop-blur-md">
-        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center sm:flex-nowrap justify-between gap-x-4 gap-y-2 px-4 py-3">
             <div class="flex items-center gap-3 sm:gap-4">
                 <a href="{{ url('/') }}" class="flex items-center gap-2 text-lg font-extrabold tracking-tight">
                     <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-cyan-500 text-white shadow-md shadow-brand-500/30">
@@ -86,8 +86,12 @@
                 @include('partials.mode-switcher')
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:flex-nowrap">
                 <div id="microcrop-header-status" class="hidden sm:block"></div>
+
+                @if(app()->getLocale() === 'ru')
+                    <iframe src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=1KN3D2LVOSJ.261004&" width="200" height="50" frameborder="0" allowtransparency="true" scrolling="no" title="Поддержка сайта" class="max-w-full shrink-0"></iframe>
+                @endif
 
                 @include('partials.language-switcher')
 
