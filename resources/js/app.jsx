@@ -80,6 +80,20 @@ if (mountEl) {
         preset = null;
     }
 
+    // Цель Яндекс Метрики "microcropAppUsage" (JS-событие, идентификатор содержит
+    // "microcrop-app"): первое взаимодействие с редактором, один раз за визит.
+    mountEl.addEventListener(
+        'click',
+        () => {
+            try {
+                window.ym?.(113417095, 'reachGoal', 'microcrop-app');
+            } catch {
+                // метрика не должна ломать редактор
+            }
+        },
+        { once: true },
+    );
+
     // data-locale проставляет Blade (уже разрешённый SetLocale middleware язык
     // сервера), чтобы клиентский редактор стартовал на том же языке; если атрибута
     // нет — I18nProvider сам определит язык браузера.
