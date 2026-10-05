@@ -92,7 +92,7 @@
                 @if(app()->getLocale() === 'ru')
                     <div class="flex shrink-0 flex-col items-center">
                         <iframe src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=1KN3D2LVOSJ.261004&" width="200" height="50" frameborder="0" allowtransparency="true" scrolling="no" title="Поддержка сайта" class="max-w-full"></iframe>
-                        <span class="text-[10px] leading-none text-slate-400">поддержка сайта</span>
+                        <a href="https://yoomoney.ru/to/41001580301290" target="_blank" rel="noopener noreferrer" class="text-[10px] leading-none text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline">поддержка сайта</a>
                     </div>
                 @endif
 
